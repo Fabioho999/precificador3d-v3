@@ -264,7 +264,21 @@
         <div class="header-badge-dot"></div>
         <span>v3.0 — Despesas · Lucro Líquido · Estoque · Prazos</span>
       </div>
+      <button class="btn btn-ghost btn-sm" id="btnConta">☁️ Entrar / sincronizar</button>
     </header>
+
+    <div id="modalConta" style="display:none; position:fixed; inset:0; z-index:100000; background:rgba(2,6,23,.88); padding:16px; align-items:center; justify-content:center;">
+      <div class="card" style="width:min(420px,100%);">
+        <div class="card-header"><div><div class="card-title">Conta e sincronização</div><div class="card-subtitle" id="contaStatus">Entre para acessar os mesmos dados em qualquer aparelho.</div></div><button class="btn btn-ghost btn-sm" id="btnFecharConta">Fechar</button></div>
+        <div id="formLogin" class="field-group">
+          <div class="field"><label>E-mail</label><input type="email" id="contaEmail" placeholder="seu@email.com"></div>
+          <div class="field"><label>Senha</label><input type="password" id="contaSenha" placeholder="Mínimo de 6 caracteres"></div>
+          <div class="btn-row"><button class="btn btn-primary" id="btnEntrar">Entrar</button><button class="btn btn-soft" id="btnCriarConta">Criar conta</button></div>
+          <small class="helper">No primeiro acesso, crie a conta. Seus dados locais serão enviados ao banco; em outros aparelhos, os dados online serão carregados.</small>
+        </div>
+        <div id="contaLogada" style="display:none;"><div class="alert alert-success" id="contaEmailLogado"></div><div class="btn-row"><button class="btn btn-primary" id="btnSincronizar">Sincronizar agora</button><button class="btn btn-danger" id="btnSairConta">Sair</button></div></div>
+      </div>
+    </div>
 
     <main class="app-main">
       <div class="tabs" role="tablist">
@@ -1001,6 +1015,7 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script>
     // ========== UTILITÁRIOS ==========
@@ -1040,6 +1055,78 @@
       DESPESAS: "fh3d_despesas",
       DESPESAS_FIXAS: "fh3d_despesas_fixas",
     };
+
+    // ========== NUVEM: SUPABASE ===========
+    // A publishable key pode ficar no navegador; as políticas RLS do banco protegem cada conta.
+    const supabaseClient = window.supabase.createClient(
+      "https://zqblyzxsuuefhpnkibva.supabase.co",
+      "sb_publishable_mG4lJVyN8EaI_Lc6ehcHGw_8mmssMDT"
+    );
+    const CHAVES_NUVEM = Object.values(STORAGE);
+    let usuarioNuvem = null;
+    let timerNuvem = null;
+    let gravarNuvemTimer = null;
+    const localStorageOriginalSet = localStorage.setItem.bind(localStorage);
+
+    async function enviarDadosNuvem() {
+      if (!usuarioNuvem) return;
+      const linhas = CHAVES_NUVEM.map(chave => ({ user_id: usuarioNuvem.id, chave, valor: JSON.parse(localStorage.getItem(chave) || "null") }));
+      const { error } = await supabaseClient.from("precificador_dados").upsert(linhas, { onConflict: "user_id,chave" });
+      if (error) console.error("Erro ao sincronizar na nuvem:", error.message);
+    }
+
+    async function baixarDadosNuvem() {
+      if (!usuarioNuvem) return false;
+      const { data, error } = await supabaseClient.from("precificador_dados").select("chave,valor").eq("user_id", usuarioNuvem.id);
+      if (error) { console.error("Erro ao baixar dados:", error.message); return false; }
+      if (!data?.length) { await enviarDadosNuvem(); return false; }
+      data.forEach(item => localStorageOriginalSet(item.chave, JSON.stringify(item.valor)));
+      return true;
+    }
+
+    function agendarEnvioNuvem() {
+      if (!usuarioNuvem) return;
+      clearTimeout(gravarNuvemTimer);
+      gravarNuvemTimer = setTimeout(enviarDadosNuvem, 700);
+    }
+
+    localStorage.setItem = (chave, valor) => {
+      localStorageOriginalSet(chave, valor);
+      if (CHAVES_NUVEM.includes(chave)) agendarEnvioNuvem();
+    };
+
+    function atualizarModalConta() {
+      document.getElementById("formLogin").style.display = usuarioNuvem ? "none" : "grid";
+      document.getElementById("contaLogada").style.display = usuarioNuvem ? "block" : "none";
+      document.getElementById("contaStatus").textContent = usuarioNuvem ? "Dados protegidos e sincronizados na sua conta." : "Entre para acessar os mesmos dados em qualquer aparelho.";
+      if (usuarioNuvem) document.getElementById("contaEmailLogado").textContent = `Conectado como ${usuarioNuvem.email}`;
+    }
+
+    async function ativarUsuarioNuvem(user, carregar = true) {
+      usuarioNuvem = user;
+      atualizarModalConta();
+      if (carregar && await baixarDadosNuvem()) location.reload();
+      clearInterval(timerNuvem);
+      timerNuvem = setInterval(enviarDadosNuvem, 30000);
+    }
+
+    document.getElementById("btnConta").onclick = () => { document.getElementById("modalConta").style.display = "flex"; atualizarModalConta(); };
+    document.getElementById("btnFecharConta").onclick = () => document.getElementById("modalConta").style.display = "none";
+    document.getElementById("btnEntrar").onclick = async () => {
+      const { data, error } = await supabaseClient.auth.signInWithPassword({ email: document.getElementById("contaEmail").value.trim(), password: document.getElementById("contaSenha").value });
+      if (error) return alert("Não foi possível entrar: " + error.message);
+      await ativarUsuarioNuvem(data.user);
+    };
+    document.getElementById("btnCriarConta").onclick = async () => {
+      const email = document.getElementById("contaEmail").value.trim(), password = document.getElementById("contaSenha").value;
+      const { data, error } = await supabaseClient.auth.signUp({ email, password });
+      if (error) return alert("Não foi possível criar a conta: " + error.message);
+      if (!data.session) return alert("Conta criada. Confirme o e-mail recebido e depois entre aqui.");
+      await ativarUsuarioNuvem(data.user);
+    };
+    document.getElementById("btnSincronizar").onclick = async () => { await enviarDadosNuvem(); alert("Dados enviados para a nuvem."); };
+    document.getElementById("btnSairConta").onclick = async () => { await supabaseClient.auth.signOut(); usuarioNuvem = null; clearInterval(timerNuvem); atualizarModalConta(); };
+    supabaseClient.auth.getSession().then(({ data }) => { if (data.session?.user) ativarUsuarioNuvem(data.session.user); });
 
     // ========== CONFIG INICIAL ==========
     function carregarConfig() {
