@@ -1125,7 +1125,6 @@
       atualizarModalConta();
       informarNuvem("Conectado. Use “Enviar” no PC e “Baixar” no celular.");
       clearInterval(timerNuvem);
-      timerNuvem = setInterval(enviarDadosNuvem, 30000);
     }
 
     document.getElementById("btnConta").onclick = () => { document.getElementById("modalConta").style.display = "flex"; atualizarModalConta(); };
