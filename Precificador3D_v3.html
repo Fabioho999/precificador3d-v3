@@ -276,7 +276,7 @@
           <div class="btn-row"><button class="btn btn-primary" id="btnEntrar">Entrar</button><button class="btn btn-soft" id="btnCriarConta">Criar conta</button></div>
           <small class="helper">No primeiro acesso, crie a conta. Seus dados locais serão enviados ao banco; em outros aparelhos, os dados online serão carregados.</small>
         </div>
-        <div id="contaLogada" style="display:none;"><div class="alert alert-success" id="contaEmailLogado"></div><div class="btn-row"><button class="btn btn-primary" id="btnSincronizar">Sincronizar agora</button><button class="btn btn-danger" id="btnSairConta">Sair</button></div></div>
+        <div id="contaLogada" style="display:none;"><div class="alert alert-success" id="contaEmailLogado"></div><div class="storage-info" id="nuvemStatus">Verificando conexão...</div><div class="btn-row"><button class="btn btn-primary" id="btnSincronizar">Enviar PC para nuvem</button><button class="btn btn-soft" id="btnBaixarNuvem">Baixar nuvem neste aparelho</button><button class="btn btn-danger" id="btnSairConta">Sair</button></div></div>
       </div>
     </div>
 
@@ -1068,6 +1068,13 @@
     let gravarNuvemTimer = null;
     const localStorageOriginalSet = localStorage.setItem.bind(localStorage);
 
+    function informarNuvem(texto, erro = false) {
+      const el = document.getElementById("nuvemStatus");
+      if (!el) return;
+      el.textContent = texto;
+      el.style.color = erro ? "var(--accent-red)" : "var(--text-muted)";
+    }
+
     function valorLocalParaNuvem(chave) {
       const bruto = localStorage.getItem(chave);
       if (bruto === null) return null;
@@ -1075,19 +1082,23 @@
     }
 
     async function enviarDadosNuvem() {
-      if (!usuarioNuvem) return;
+      if (!usuarioNuvem) return false;
+      informarNuvem("Enviando dados para a nuvem...");
       const linhas = CHAVES_NUVEM.map(chave => ({ user_id: usuarioNuvem.id, chave, valor: valorLocalParaNuvem(chave) }));
       const { error } = await supabaseClient.from("precificador_dados").upsert(linhas, { onConflict: "user_id,chave" });
-      if (error) { console.error("Erro ao sincronizar na nuvem:", error.message); return false; }
+      if (error) { console.error("Erro ao sincronizar na nuvem:", error.message); informarNuvem("Erro do Supabase: " + error.message, true); return false; }
+      informarNuvem(`Sincronizado: ${linhas.length} grupos de dados enviados agora.`);
       return true;
     }
 
     async function baixarDadosNuvem() {
       if (!usuarioNuvem) return false;
+      informarNuvem("Baixando dados da nuvem...");
       const { data, error } = await supabaseClient.from("precificador_dados").select("chave,valor").eq("user_id", usuarioNuvem.id);
-      if (error) { console.error("Erro ao baixar dados:", error.message); return false; }
-      if (!data?.length) { await enviarDadosNuvem(); return false; }
+      if (error) { console.error("Erro ao baixar dados:", error.message); informarNuvem("Erro do Supabase: " + error.message, true); return false; }
+      if (!data?.length) { informarNuvem("Nenhum dado encontrado nesta conta. Envie primeiro pelo PC.", true); return false; }
       data.forEach(item => localStorageOriginalSet(item.chave, typeof item.valor === "string" ? item.valor : JSON.stringify(item.valor)));
+      informarNuvem(`${data.length} grupos de dados recebidos. Atualizando a tela...`);
       return true;
     }
 
@@ -1109,17 +1120,10 @@
       if (usuarioNuvem) document.getElementById("contaEmailLogado").textContent = `Conectado como ${usuarioNuvem.email}`;
     }
 
-    async function ativarUsuarioNuvem(user, carregar = true) {
+    async function ativarUsuarioNuvem(user, carregar = false) {
       usuarioNuvem = user;
       atualizarModalConta();
-      // A importação reinicia a interface para redesenhar todas as abas. A marca na
-      // sessão evita que o reload volte a importar e gere um ciclo infinito.
-      const marcaImportacao = `fh3d_nuvem_carregada_${user.id}`;
-      if (carregar && !sessionStorage.getItem(marcaImportacao) && await baixarDadosNuvem()) {
-        sessionStorage.setItem(marcaImportacao, "1");
-        location.reload();
-        return;
-      }
+      informarNuvem("Conectado. Use “Enviar” no PC e “Baixar” no celular.");
       clearInterval(timerNuvem);
       timerNuvem = setInterval(enviarDadosNuvem, 30000);
     }
@@ -1138,7 +1142,8 @@
       if (!data.session) return alert("Conta criada. Confirme o e-mail recebido e depois entre aqui.");
       await ativarUsuarioNuvem(data.user);
     };
-    document.getElementById("btnSincronizar").onclick = async () => { const ok = await enviarDadosNuvem(); alert(ok ? "Dados enviados para a nuvem." : "Não foi possível sincronizar. Verifique se o script SQL do Supabase foi executado."); };
+    document.getElementById("btnSincronizar").onclick = enviarDadosNuvem;
+    document.getElementById("btnBaixarNuvem").onclick = async () => { if (await baixarDadosNuvem()) location.reload(); };
     document.getElementById("btnSairConta").onclick = async () => { if (usuarioNuvem) sessionStorage.removeItem(`fh3d_nuvem_carregada_${usuarioNuvem.id}`); await supabaseClient.auth.signOut(); usuarioNuvem = null; clearInterval(timerNuvem); atualizarModalConta(); };
     supabaseClient.auth.getSession().then(({ data }) => { if (data.session?.user) ativarUsuarioNuvem(data.session.user); });
 
