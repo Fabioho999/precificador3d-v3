@@ -2944,7 +2944,10 @@ Sujeito a alterações conforme mudanças no projeto.`;
 
       // Verificar se a biblioteca de PDF carregou (falha comum se estiver offline)
       if (typeof html2pdf === "undefined") {
-        alert("⚠️ A biblioteca de PDF não carregou. Conecte-se à internet pelo menos uma vez para gerar o PDF.");
+        const janela = window.open("", "_blank");
+        if (!janela) { alert("⚠️ A biblioteca de PDF não carregou e o navegador bloqueou a janela de impressão."); return; }
+        janela.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Orçamento</title></head><body>${container.outerHTML}<script>window.onload=()=>window.print();<\/script></body></html>`);
+        janela.document.close();
         return;
       }
 
