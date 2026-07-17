@@ -1105,7 +1105,14 @@
     async function ativarUsuarioNuvem(user, carregar = true) {
       usuarioNuvem = user;
       atualizarModalConta();
-      if (carregar && await baixarDadosNuvem()) location.reload();
+      // A importação reinicia a interface para redesenhar todas as abas. A marca na
+      // sessão evita que o reload volte a importar e gere um ciclo infinito.
+      const marcaImportacao = `fh3d_nuvem_carregada_${user.id}`;
+      if (carregar && !sessionStorage.getItem(marcaImportacao) && await baixarDadosNuvem()) {
+        sessionStorage.setItem(marcaImportacao, "1");
+        location.reload();
+        return;
+      }
       clearInterval(timerNuvem);
       timerNuvem = setInterval(enviarDadosNuvem, 30000);
     }
@@ -1125,7 +1132,7 @@
       await ativarUsuarioNuvem(data.user);
     };
     document.getElementById("btnSincronizar").onclick = async () => { await enviarDadosNuvem(); alert("Dados enviados para a nuvem."); };
-    document.getElementById("btnSairConta").onclick = async () => { await supabaseClient.auth.signOut(); usuarioNuvem = null; clearInterval(timerNuvem); atualizarModalConta(); };
+    document.getElementById("btnSairConta").onclick = async () => { if (usuarioNuvem) sessionStorage.removeItem(`fh3d_nuvem_carregada_${usuarioNuvem.id}`); await supabaseClient.auth.signOut(); usuarioNuvem = null; clearInterval(timerNuvem); atualizarModalConta(); };
     supabaseClient.auth.getSession().then(({ data }) => { if (data.session?.user) ativarUsuarioNuvem(data.session.user); });
 
     // ========== CONFIG INICIAL ==========
