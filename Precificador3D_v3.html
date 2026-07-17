@@ -1068,11 +1068,18 @@
     let gravarNuvemTimer = null;
     const localStorageOriginalSet = localStorage.setItem.bind(localStorage);
 
+    function valorLocalParaNuvem(chave) {
+      const bruto = localStorage.getItem(chave);
+      if (bruto === null) return null;
+      try { return JSON.parse(bruto); } catch { return bruto; }
+    }
+
     async function enviarDadosNuvem() {
       if (!usuarioNuvem) return;
-      const linhas = CHAVES_NUVEM.map(chave => ({ user_id: usuarioNuvem.id, chave, valor: JSON.parse(localStorage.getItem(chave) || "null") }));
+      const linhas = CHAVES_NUVEM.map(chave => ({ user_id: usuarioNuvem.id, chave, valor: valorLocalParaNuvem(chave) }));
       const { error } = await supabaseClient.from("precificador_dados").upsert(linhas, { onConflict: "user_id,chave" });
-      if (error) console.error("Erro ao sincronizar na nuvem:", error.message);
+      if (error) { console.error("Erro ao sincronizar na nuvem:", error.message); return false; }
+      return true;
     }
 
     async function baixarDadosNuvem() {
@@ -1080,7 +1087,7 @@
       const { data, error } = await supabaseClient.from("precificador_dados").select("chave,valor").eq("user_id", usuarioNuvem.id);
       if (error) { console.error("Erro ao baixar dados:", error.message); return false; }
       if (!data?.length) { await enviarDadosNuvem(); return false; }
-      data.forEach(item => localStorageOriginalSet(item.chave, JSON.stringify(item.valor)));
+      data.forEach(item => localStorageOriginalSet(item.chave, typeof item.valor === "string" ? item.valor : JSON.stringify(item.valor)));
       return true;
     }
 
@@ -1131,7 +1138,7 @@
       if (!data.session) return alert("Conta criada. Confirme o e-mail recebido e depois entre aqui.");
       await ativarUsuarioNuvem(data.user);
     };
-    document.getElementById("btnSincronizar").onclick = async () => { await enviarDadosNuvem(); alert("Dados enviados para a nuvem."); };
+    document.getElementById("btnSincronizar").onclick = async () => { const ok = await enviarDadosNuvem(); alert(ok ? "Dados enviados para a nuvem." : "Não foi possível sincronizar. Verifique se o script SQL do Supabase foi executado."); };
     document.getElementById("btnSairConta").onclick = async () => { if (usuarioNuvem) sessionStorage.removeItem(`fh3d_nuvem_carregada_${usuarioNuvem.id}`); await supabaseClient.auth.signOut(); usuarioNuvem = null; clearInterval(timerNuvem); atualizarModalConta(); };
     supabaseClient.auth.getSession().then(({ data }) => { if (data.session?.user) ativarUsuarioNuvem(data.session.user); });
 
