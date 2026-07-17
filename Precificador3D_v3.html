@@ -1058,10 +1058,10 @@
 
     // ========== NUVEM: SUPABASE ===========
     // A publishable key pode ficar no navegador; as políticas RLS do banco protegem cada conta.
-    const supabaseClient = window.supabase.createClient(
+    const supabaseClient = window.supabase?.createClient ? window.supabase.createClient(
       "https://zqblyzxsuuefhpnkibva.supabase.co",
       "sb_publishable_mG4lJVyN8EaI_Lc6ehcHGw_8mmssMDT"
-    );
+    ) : null;
     const CHAVES_NUVEM = Object.values(STORAGE);
     let usuarioNuvem = null;
     let timerNuvem = null;
@@ -1082,6 +1082,7 @@
     }
 
     async function enviarDadosNuvem() {
+      if (!supabaseClient) { informarNuvem("Serviço de nuvem indisponível. O Precificador local continua funcionando.", true); return false; }
       if (!usuarioNuvem) return false;
       informarNuvem("Enviando dados para a nuvem...");
       const linhas = CHAVES_NUVEM.map(chave => ({ user_id: usuarioNuvem.id, chave, valor: valorLocalParaNuvem(chave) }));
@@ -1092,6 +1093,7 @@
     }
 
     async function baixarDadosNuvem() {
+      if (!supabaseClient) { informarNuvem("Serviço de nuvem indisponível. O Precificador local continua funcionando.", true); return false; }
       if (!usuarioNuvem) return false;
       informarNuvem("Baixando dados da nuvem...");
       const { data, error } = await supabaseClient.from("precificador_dados").select("chave,valor").eq("user_id", usuarioNuvem.id);
@@ -1130,11 +1132,13 @@
     document.getElementById("btnConta").onclick = () => { document.getElementById("modalConta").style.display = "flex"; atualizarModalConta(); };
     document.getElementById("btnFecharConta").onclick = () => document.getElementById("modalConta").style.display = "none";
     document.getElementById("btnEntrar").onclick = async () => {
+      if (!supabaseClient) return alert("A biblioteca de sincronização não carregou. Verifique sua conexão e recarregue a página.");
       const { data, error } = await supabaseClient.auth.signInWithPassword({ email: document.getElementById("contaEmail").value.trim(), password: document.getElementById("contaSenha").value });
       if (error) return alert("Não foi possível entrar: " + error.message);
       await ativarUsuarioNuvem(data.user);
     };
     document.getElementById("btnCriarConta").onclick = async () => {
+      if (!supabaseClient) return alert("A biblioteca de sincronização não carregou. Verifique sua conexão e recarregue a página.");
       const email = document.getElementById("contaEmail").value.trim(), password = document.getElementById("contaSenha").value;
       const { data, error } = await supabaseClient.auth.signUp({ email, password });
       if (error) return alert("Não foi possível criar a conta: " + error.message);
@@ -1143,8 +1147,8 @@
     };
     document.getElementById("btnSincronizar").onclick = enviarDadosNuvem;
     document.getElementById("btnBaixarNuvem").onclick = async () => { if (await baixarDadosNuvem()) location.reload(); };
-    document.getElementById("btnSairConta").onclick = async () => { if (usuarioNuvem) sessionStorage.removeItem(`fh3d_nuvem_carregada_${usuarioNuvem.id}`); await supabaseClient.auth.signOut(); usuarioNuvem = null; clearInterval(timerNuvem); atualizarModalConta(); };
-    supabaseClient.auth.getSession().then(({ data }) => { if (data.session?.user) ativarUsuarioNuvem(data.session.user); });
+    document.getElementById("btnSairConta").onclick = async () => { if (!supabaseClient) return; if (usuarioNuvem) sessionStorage.removeItem(`fh3d_nuvem_carregada_${usuarioNuvem.id}`); await supabaseClient.auth.signOut(); usuarioNuvem = null; clearInterval(timerNuvem); atualizarModalConta(); };
+    if (supabaseClient) supabaseClient.auth.getSession().then(({ data }) => { if (data.session?.user) ativarUsuarioNuvem(data.session.user); });
 
     // ========== CONFIG INICIAL ==========
     function carregarConfig() {
