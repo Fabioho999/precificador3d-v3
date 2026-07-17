@@ -1,0 +1,2889 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Precificador 3D Pro - Gestão Completa</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --bg-main: #050816;
+      --bg-card: #111827;
+      --bg-card-soft: #0b1220;
+      --border-soft: #1f2937;
+      --text-main: #f9fafb;
+      --text-muted: #9ca3af;
+      --accent: #06b6d4;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --radius-lg: 14px;
+      --radius-md: 10px;
+      --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.55);
+      --transition-fast: 0.18s ease-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #1f2937 0, #050816 45%, #020617 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+    }
+
+    .app-shell { max-width: 1320px; margin: 0 auto; padding: 24px 16px 40px; }
+
+    header {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; margin-bottom: 24px; flex-wrap: wrap;
+    }
+
+    .brand { display: flex; align-items: center; gap: 14px; }
+    .brand-logo { width: 40px; height: 40px; border-radius: 8px; background: rgba(6, 182, 212, 0.2); border: 1px solid var(--accent); display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--accent); }
+    .brand-text-title { font-weight: 700; letter-spacing: 0.1em; font-size: 11px; text-transform: uppercase; color: var(--text-muted); }
+    .brand-text-main { font-weight: 800; font-size: 24px; letter-spacing: 0.06em; }
+    .brand-text-main span { color: var(--accent); }
+
+    .header-badge {
+      padding: 6px 12px; border-radius: 999px; background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.3); font-size: 11px; text-transform: uppercase;
+      letter-spacing: 0.12em; color: var(--text-muted); display: flex; align-items: center; gap: 8px;
+    }
+
+    .header-badge-dot { width: 7px; height: 7px; border-radius: 999px; background: var(--accent-green); }
+
+    .app-main {
+      background: radial-gradient(circle at top left, #0b1120 0, #020617 55%);
+      border-radius: 24px; border: 1px solid rgba(148, 163, 184, 0.25);
+      box-shadow: var(--shadow-soft); padding: 16px;
+    }
+
+    .tabs {
+      display: flex; align-items: center; gap: 4px; padding: 4px; border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(31, 41, 55, 0.95);
+      margin-bottom: 18px; flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      flex: 1; border-radius: 999px; padding: 8px 12px; font-size: 13px; border: none;
+      background: transparent; color: var(--text-muted); cursor: pointer; display: flex;
+      align-items: center; justify-content: center; gap: 6px;
+      transition: all var(--transition-fast);
+    }
+
+    .tab-btn.active {
+      background: radial-gradient(circle at top left, #0f172a, #020617);
+      color: var(--text-main); box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .tab-btn:not(.active):hover { background: rgba(15, 23, 42, 0.9); color: #e5e7eb; }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .panel-grid { display: grid; gap: 16px; }
+    @media (min-width: 900px) {
+      .panel-grid.two-cols { grid-template-columns: 2fr 1.3fr; }
+      .panel-grid.three-cols { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    .card {
+      background: radial-gradient(circle at top, var(--bg-card) 0, var(--bg-card-soft) 100%);
+      border-radius: var(--radius-lg); border: 1px solid var(--border-soft);
+      padding: 16px; box-shadow: 0 14px 35px rgba(15, 23, 42, 0.8);
+    }
+
+    .card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
+    .card-title { font-size: 15px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+    .card-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    .chip {
+      font-size: 11px; padding: 4px 9px; border-radius: 999px; border: 1px solid rgba(148, 163, 184, 0.4);
+      color: var(--text-muted); background: rgba(15, 23, 42, 0.9);
+    }
+
+    .field-group { display: grid; gap: 10px; margin-top: 4px; }
+    .field-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .field { display: flex; flex-direction: column; gap: 4px; }
+
+    label { font-size: 12px; color: var(--text-muted); }
+    label .req { color: var(--accent); margin-left: 2px; }
+
+    input[type="text"], input[type="email"], input[type="date"],
+    input[type="file"], select, textarea {
+      background: rgba(15, 23, 42, 0.9); border-radius: var(--radius-md);
+      border: 1px solid rgba(55, 65, 81, 0.9); padding: 8px 10px; font-size: 13px;
+      color: var(--text-main); outline: none;
+      transition: border var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    input::placeholder, textarea::placeholder { color: rgba(148, 163, 184, 0.7); }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent); box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.8);
+      background: rgba(15, 23, 42, 0.95);
+    }
+
+    textarea { resize: vertical; min-height: 80px; }
+
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+
+    .btn {
+      border-radius: 999px; padding: 8px 14px; font-size: 13px; border: none; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 6px;
+      transition: all var(--transition-fast); white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(to right, #06b6d4, #22d3ee); color: #0b1120;
+      font-weight: 600; box-shadow: 0 10px 30px rgba(6, 182, 212, 0.55);
+    }
+
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 14px 40px rgba(6, 182, 212, 0.75); }
+
+    .btn-ghost {
+      background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(75, 85, 99, 0.85);
+      color: var(--text-muted);
+    }
+
+    .btn-ghost:hover { border-color: rgba(148, 163, 184, 0.9); color: #e5e7eb; transform: translateY(-1px); }
+
+    .btn-soft {
+      background: rgba(8, 47, 73, 0.9); border: 1px solid rgba(45, 212, 191, 0.6);
+      color: var(--accent);
+    }
+
+    .btn-soft:hover { transform: translateY(-1px); }
+
+    .btn-sm { padding: 6px 10px; font-size: 12px; }
+    .btn-danger { background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.6); color: var(--accent-red); }
+    .btn-danger:hover { background: rgba(239, 68, 68, 0.3); }
+
+    .result-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 4px; }
+    .result-pill {
+      background: rgba(15, 23, 42, 0.95); border-radius: var(--radius-md);
+      padding: 8px 10px; border: 1px solid rgba(51, 65, 85, 0.9);
+      display: flex; flex-direction: column; gap: 2px;
+    }
+
+    .result-label { font-size: 11px; color: var(--text-muted); }
+    .result-value { font-size: 14px; font-weight: 600; }
+    .result-highlight { border-color: rgba(56, 189, 248, 0.8); box-shadow: 0 0 30px rgba(59, 130, 246, 0.3); }
+
+    .table-custom {
+      width: 100%; border-collapse: collapse; margin-top: 8px;
+    }
+
+    .table-custom th, .table-custom td {
+      font-size: 12px; padding: 6px 8px; border-bottom: 1px solid rgba(31, 41, 55, 0.9);
+      text-align: left;
+    }
+
+    .table-custom th { color: var(--text-muted); font-weight: 600; }
+    .table-custom tbody tr:hover { background: rgba(15, 23, 42, 0.85); }
+
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px;
+      border-radius: 999px; border: 1px solid rgba(55, 65, 81, 0.9);
+      background: rgba(15, 23, 42, 0.9); font-size: 11px; color: var(--text-muted);
+    }
+
+    .status-dot { width: 7px; height: 7px; border-radius: 999px; }
+    .status-pending { background: #f59e0b; }
+    .status-active { background: var(--accent-green); }
+    .status-completed { background: var(--accent); }
+
+    .item-row {
+      border-radius: 10px; padding: 10px; background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(31, 41, 55, 0.8); margin-bottom: 10px;
+    }
+
+    .logo-preview {
+      width: 100px; height: 100px; border-radius: 10px; border: 2px dashed var(--border-soft);
+      display: flex; align-items: center; justify-content: center; overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .logo-preview img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+    .storage-info {
+      font-size: 11px; color: var(--text-muted); margin-top: 8px; padding: 8px;
+      background: rgba(15, 23, 42, 0.5); border-radius: 6px;
+    }
+
+    .pix-code {
+      background: #ffffff; padding: 12px; border-radius: 8px; margin-top: 8px;
+      text-align: center; font-size: 12px; color: #111827; font-family: monospace;
+      word-break: break-all;
+    }
+
+    footer {
+      margin-top: 12px; font-size: 11px; color: var(--text-muted);
+      text-align: right; opacity: 0.85;
+    }
+
+    .helper { font-size: 11px; color: var(--text-muted); }
+
+    .alert {
+      padding: 12px; border-radius: 8px; margin-bottom: 12px; font-size: 13px;
+    }
+
+    .alert-info { background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.5); color: #93c5fd; }
+    .alert-success { background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.5); color: #86efac; }
+    .alert-warning { background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245, 158, 11, 0.5); color: #fcd34d; }
+
+    .stock-card {
+      background: rgba(15, 23, 42, 0.7); padding: 12px; border-radius: 10px;
+      border: 1px solid rgba(31, 41, 55, 0.8); margin-bottom: 10px;
+    }
+
+    .stock-card-header { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .stock-card-title { font-weight: 600; font-size: 13px; }
+    .stock-card-info { font-size: 11px; color: var(--text-muted); display: flex; gap: 12px; flex-wrap: wrap; }
+
+    @media (max-width: 768px) {
+      .panel-grid { grid-template-columns: 1fr !important; }
+      .field-row { grid-template-columns: 1fr !important; }
+      .tabs { gap: 2px; }
+      .tab-btn { font-size: 12px; padding: 6px 10px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app-shell">
+    <header>
+      <div class="brand">
+        <div class="brand-logo">📦</div>
+        <div>
+          <div class="brand-text-title">Gestão 3D</div>
+          <div class="brand-text-main">PRECIFICADOR <span>3D</span> PRO</div>
+        </div>
+      </div>
+      <div class="header-badge">
+        <div class="header-badge-dot"></div>
+        <span>v3.0 — Despesas · Lucro Líquido · Estoque · Prazos</span>
+      </div>
+    </header>
+
+    <main class="app-main">
+      <div class="tabs" role="tablist">
+        <button class="tab-btn active" data-tab="dashboard">🏠 Home</button>
+        <button class="tab-btn" data-tab="orcamento">📐 Orçamento</button>
+        <button class="tab-btn" data-tab="custos">⚙️ Custos</button>
+        <button class="tab-btn" data-tab="estoque">📦 Estoque</button>
+        <button class="tab-btn" data-tab="catalogo">🎁 Catálogo</button>
+        <button class="tab-btn" data-tab="calibracoes">🔧 Calibrações</button>
+        <button class="tab-btn" data-tab="prazos">📅 Prazos</button>
+        <button class="tab-btn" data-tab="despesas">💸 Despesas</button>
+        <button class="tab-btn" data-tab="controle">💰 Controle</button>
+        <button class="tab-btn" data-tab="config">⚡ Config</button>
+      </div>
+
+      <!-- TAB: DASHBOARD -->
+      <section class="tab-panel active" id="tab-dashboard">
+        <div class="panel-grid three-cols">
+          <div class="card">
+            <div class="card-title" style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">💰 FATURAMENTO & LUCRO (MÊS)</div>
+            <div style="font-size: 32px; font-weight: bold; color: var(--accent-green); margin-bottom: 4px;" id="dashFaturamento">R$ 0,00</div>
+            <div style="font-size: 12px; color: var(--text-muted);">
+              Pago: <span id="dashPago">R$ 0,00</span><br/>
+              Pendente: <span id="dashPendente">R$ 0,00</span><br/>
+              Despesas: <span id="dashDespesas">R$ 0,00</span><br/>
+              Lucro líquido: <span id="dashLucroLiquido" style="font-weight: 600;">R$ 0,00</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title" style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">📦 ESTOQUE CRÍTICO</div>
+            <div id="dashEstoqueCritico" style="display: grid; gap: 6px;">
+              <div style="font-size: 12px; color: var(--text-muted);">Nenhum em nível crítico</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title" style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">⚠️ PRAZOS ATENÇÃO</div>
+            <div id="dashPrazosAlerta" style="display: grid; gap: 6px;">
+              <div style="font-size: 12px; color: var(--text-muted);">Nenhum atrasado</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-grid">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Últimos Orçamentos</div>
+              </div>
+            </div>
+            <table class="table-custom">
+              <thead>
+                <tr>
+                  <th>Cliente</th>
+                  <th>Projeto</th>
+                  <th>Valor</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="dashUltimosOrc"></tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Próximas Entregas</div>
+              </div>
+            </div>
+            <div id="dashProximas" style="display: grid; gap: 8px;">
+              <div style="font-size: 12px; color: var(--text-muted);">Nenhuma programada</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB: ORÇAMENTO -->
+      <section class="tab-panel active" id="tab-orcamento">
+        <div class="panel-grid two-cols">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Novo Orçamento</div>
+                <div class="card-subtitle">Dados do cliente e itens para impressão</div>
+              </div>
+              <span class="chip">Multi-itens</span>
+            </div>
+
+            <div class="field-group">
+              <div class="field-row">
+                <div class="field">
+                  <label>Cliente</label>
+                  <input type="text" id="orcCliente" placeholder="Nome do cliente" />
+                </div>
+                <div class="field">
+                  <label>Projeto <span class="req">*</span></label>
+                  <input type="text" id="orcProjeto" placeholder="Nome do projeto" />
+                </div>
+              </div>
+
+              <div class="field">
+                <label>Descrição geral</label>
+                <textarea id="orcDescricao" placeholder="Detalhe o projeto..."></textarea>
+              </div>
+
+              <div class="field">
+                <label>Fotos do produto (opcional)</label>
+                <input type="file" id="orcFotos" accept="image/png,image/jpeg,image/webp" multiple />
+                <small style="color: var(--text-muted);">As fotos selecionadas acompanham o PDF do orçamento.</small>
+                <div id="orcFotosPreview" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;"></div>
+              </div>
+
+              <div class="field">
+                <label>Impressora a usar</label>
+                <select id="orcImpressora">
+                  <option value="K1C">Creality K1C</option>
+                  <option value="KOBRA">Anycubic Kobra S1 Combo</option>
+                  <option value="AMBAS">Ambas (distribuir)</option>
+                </select>
+              </div>
+            </div>
+
+            <hr style="border: none; border-top: 1px solid rgba(31, 41, 55, 0.9); margin: 14px 0;" />
+
+            <div class="card-header" style="margin-bottom: 6px;">
+              <div>
+                <div class="card-title">Itens</div>
+              </div>
+              <button class="btn btn-soft btn-sm" id="btnAddOrcItem">Adicionar</button>
+            </div>
+            <div id="orcItensContainer"></div>
+
+            <div class="alert alert-info" style="margin-top: 12px;">
+              ℹ️ <strong>Nota:</strong> Custo de filamento e lucro são puxados automaticamente de ⚙️ Custos.
+              Customize apenas desconto e prazo para este orçamento.
+            </div>
+
+            <hr style="border: none; border-top: 1px solid rgba(31, 41, 55, 0.9); margin: 14px 0;" />
+
+            <div class="field-group">
+              <div class="field-row">
+                <div class="field">
+                  <label>Modelagem 3D (R$) - Opcional</label>
+                  <input type="text" inputmode="decimal" id="orcModelagem" min="0" step="0.01" placeholder="Ex.: 50" />
+                </div>
+                <div class="field">
+                  <label>Pintura / Acabamento (R$) - Opcional</label>
+                  <input type="text" inputmode="decimal" id="orcPintura" min="0" step="0.01" placeholder="Ex.: 30" />
+                </div>
+              </div>
+              <div class="field-row">
+                <div class="field">
+                  <label>Desconto (R$) - Opcional</label>
+                  <input type="text" inputmode="decimal" id="orcDesconto" min="0" step="0.01" placeholder="Ex.: 50" />
+                </div>
+                <div class="field">
+                  <label>Prazo de entrega (dias)</label>
+                  <input type="text" inputmode="decimal" id="orcPrazo" min="0" step="1" placeholder="Ex.: 7" />
+                </div>
+              </div>
+            </div>
+
+            <div class="btn-row">
+              <button class="btn btn-primary" id="btnCalcularOrc">Calcular</button>
+              <button class="btn btn-ghost btn-sm" id="btnLimparOrc">Limpar</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Resultado</div>
+              </div>
+            </div>
+
+            <div class="result-grid">
+              <div class="result-pill">
+                <span class="result-label">Custo total</span>
+                <span class="result-value" id="orcOutCustoTotal">R$ 0,00</span>
+              </div>
+              <div class="result-pill">
+                <span class="result-label">Preço sugerido</span>
+                <span class="result-value" id="orcOutPrecoSugerido">R$ 0,00</span>
+              </div>
+              <div class="result-pill result-highlight">
+                <span class="result-label">Preço final</span>
+                <span class="result-value" id="orcOutPrecoFinal">R$ 0,00</span>
+              </div>
+              <div class="result-pill">
+                <span class="result-label">Lucro estimado</span>
+                <span class="result-value" id="orcOutLucro">R$ 0,00</span>
+              </div>
+            </div>
+
+            <hr style="border: none; border-top: 1px solid rgba(31, 41, 55, 0.9); margin: 12px 0;" />
+
+            <div>
+              <label style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">Resumo</label>
+              <textarea id="orcResumo" class="monospace" style="font-size: 11px; font-family: monospace;" placeholder="Clique em Calcular"></textarea>
+            </div>
+
+            <div class="btn-row">
+              <button class="btn btn-primary btn-sm" id="btnGerarPDFOrc">Gerar PDF</button>
+              <button class="btn btn-soft btn-sm" id="btnSalvarOrcamento">Salvar</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB: CUSTOS -->
+      <section class="tab-panel" id="tab-custos">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Padrões de Custo</div>
+              <div class="card-subtitle">Configure os valores padrão para seus cálculos</div>
+            </div>
+            <span class="chip">LocalStorage</span>
+          </div>
+
+          <div class="field-group">
+            <div class="field-row">
+              <div class="field">
+                <label>Custo filamento padrão (R$/kg)</label>
+                <input type="text" inputmode="decimal" id="cfgCustoFilamento" min="0" step="0.01" placeholder="Ex.: 95" />
+              </div>
+              <div class="field">
+                <label>Tarifa energia (R$/kWh)</label>
+                <input type="text" inputmode="decimal" id="cfgTarifaEnergia" min="0" step="0.0001" placeholder="Ex.: 0.85" />
+              </div>
+            </div>
+
+            <div class="field-row">
+              <div class="field">
+                <label>Consumo K1C (kW)</label>
+                <input type="text" inputmode="decimal" id="cfgConsumoK1C" min="0" step="0.01" placeholder="Ex.: 0.25" />
+              </div>
+              <div class="field">
+                <label>Consumo Kobra (kW)</label>
+                <input type="text" inputmode="decimal" id="cfgConsumoKobra" min="0" step="0.01" placeholder="Ex.: 0.30" />
+              </div>
+            </div>
+
+            <div class="field-row">
+              <div class="field">
+                <label>Depreciação/hora (R$)</label>
+                <input type="text" inputmode="decimal" id="cfgDepreciacao" min="0" step="0.01" placeholder="Ex.: 2.50" />
+              </div>
+              <div class="field">
+                <label>Manutenção/hora (R$)</label>
+                <input type="text" inputmode="decimal" id="cfgManutencao" min="0" step="0.01" placeholder="Ex.: 0.50" />
+              </div>
+            </div>
+
+            <div class="field-row">
+              <div class="field">
+                <label>Lucro padrão (%)</label>
+                <input type="text" inputmode="decimal" id="cfgLucroPadrao" min="0" step="1" placeholder="Ex.: 30" />
+              </div>
+              <div class="field">
+                <label>Embalagem (R$)</label>
+                <input type="text" inputmode="decimal" id="cfgEmbalagem" min="0" step="0.01" placeholder="Ex.: 10" />
+              </div>
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn-primary" id="btnSalvarCustos">Salvar padrões</button>
+            <button class="btn btn-ghost btn-sm" id="btnResetCustos">Limpar</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB: ESTOQUE -->
+      <section class="tab-panel" id="tab-estoque">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Controle de Estoque</div>
+              <div class="card-subtitle">Gerenciar filamentos e materiais</div>
+            </div>
+            <button class="btn btn-primary btn-sm" id="btnAddFilamento">+ Filamento</button>
+          </div>
+
+          <div class="field-group">
+            <div class="field-row">
+              <div class="field">
+                <label>Filtrar por tipo</label>
+                <select id="filtroTipoFilamento">
+                  <option value="">Todos</option>
+                  <option value="PLA">PLA</option>
+                  <option value="PETG">PETG</option>
+                  <option value="ABS">ABS</option>
+                  <option value="RESINA">Resina</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Filtrar por fabricante</label>
+                <input type="text" id="filtroFabricante" placeholder="Ex.: Creality, MatterHackers..." />
+              </div>
+            </div>
+          </div>
+
+          <div id="estoqueContainer" class="field-group"></div>
+
+          <div class="storage-info">
+            📊 Total de filamentos: <span id="estoqueTotalQtd">0</span> |
+            Peso total: <span id="estoqueTotalPeso">0</span> kg |
+            Valor total: <span id="estoqueTotalValor">R$ 0,00</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB: CATÁLOGO -->
+      <section class="tab-panel" id="tab-catalogo">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Catálogo de Produtos Padrão</div>
+              <div class="card-subtitle">Click para adicionar à lista de itens do orçamento</div>
+            </div>
+            <button class="btn btn-primary btn-sm" id="btnAddProdutoCustom">+ Produto Custom</button>
+          </div>
+
+          <div class="field-group" style="margin-bottom: 16px;">
+            <div class="field">
+              <label>Filtrar por categoria</label>
+              <select id="filtroCatalogo">
+                <option value="">Todos</option>
+                <option value="Decoração">Decoração</option>
+                <option value="Funcional">Funcional</option>
+                <option value="Utilitário">Utilitário</option>
+                <option value="Personagem">Personagem/Miniatura</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="panel-grid three-cols" id="catalogoGrid" style="grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));">
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB: CALIBRAÇÕES -->
+      <section class="tab-panel" id="tab-calibracoes">
+        <div class="panel-grid three-cols">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Creality K1C</div>
+                <div class="card-subtitle">Presets de configuração</div>
+              </div>
+            </div>
+            <div id="calibracoesK1CContainer" class="field-group"></div>
+            <button class="btn btn-primary btn-sm" id="btnAddCalibK1C">+ Calibração</button>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Anycubic Kobra S1</div>
+                <div class="card-subtitle">Presets de configuração</div>
+              </div>
+            </div>
+            <div id="calibracoesKobraContainer" class="field-group"></div>
+            <button class="btn btn-primary btn-sm" id="btnAddCalibKobra">+ Calibração</button>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Dicas</div>
+              </div>
+            </div>
+            <div class="storage-info" style="background: rgba(59, 130, 246, 0.2);">
+              <strong>OrcaSlicer Presets:</strong><br/>
+              • Exporte suas configs favoritas<br/>
+              • Nozzle: 0.4mm, 0.6mm, 0.8mm<br/>
+              • Layer: 0.1mm, 0.2mm, 0.4mm<br/>
+              • Temp: 200-220°C (PLA)<br/>
+              • Velocidade: 80-150 mm/s<br/>
+              • Z-offset: ±0.05mm
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB: PRAZOS -->
+      <section class="tab-panel" id="tab-prazos">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Controle de Prazos</div>
+              <div class="card-subtitle">Acompanhe produção, envio e entrega</div>
+            </div>
+            <button class="btn btn-primary btn-sm" id="btnAddPrazo">+ Novo prazo</button>
+          </div>
+
+          <div class="field-group">
+            <div class="field-row">
+              <div class="field">
+                <label>Filtrar por status</label>
+                <select id="filtroPrazoStatus">
+                  <option value="">Todos</option>
+                  <option value="PENDENTE">Pendente</option>
+                  <option value="PRODUCAO">Em Produção</option>
+                  <option value="PRONTO">Pronto p/ Envio</option>
+                  <option value="ENVIADO">Enviado</option>
+                  <option value="ENTREGUE">Entregue</option>
+                  <option value="CANCELADO">Cancelado</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Ordenar por</label>
+                <select id="ordenarPrazos">
+                  <option value="prazo">Data de entrega</option>
+                  <option value="criacao">Data de criação</option>
+                  <option value="cliente">Cliente</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div id="prazosContainer" class="field-group"></div>
+
+          <div class="storage-info" style="margin-top: 12px;">
+            <strong>Resumo:</strong><br/>
+            Atrasados: <span id="prazosAtrasados" class="status-badge"><span class="status-dot status-pending"></span> 0</span>
+            | Hoje: <span id="prazosHoje" class="status-badge"><span class="status-dot status-active"></span> 0</span>
+            | Próximos 7d: <span id="prazosProximos" class="status-badge"><span class="status-dot"></span> 0</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB: DESPESAS -->
+      <section class="tab-panel" id="tab-despesas">
+        <div class="panel-grid two-cols">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Nova Despesa</div>
+                <div class="card-subtitle">Compras, contas e gastos do estúdio</div>
+              </div>
+            </div>
+
+            <div class="field-group">
+              <div class="field-row">
+                <div class="field">
+                  <label>Data</label>
+                  <input type="date" id="despData" />
+                </div>
+                <div class="field">
+                  <label>Categoria</label>
+                  <select id="despCategoria">
+                    <option value="Filamento/Material">Filamento/Material</option>
+                    <option value="Energia">Energia</option>
+                    <option value="Manutenção/Peças">Manutenção/Peças</option>
+                    <option value="Equipamento">Equipamento</option>
+                    <option value="Embalagem">Embalagem</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="Taxas/Impostos">Taxas/Impostos</option>
+                    <option value="Aluguel/Internet">Aluguel/Internet</option>
+                    <option value="Transporte/Envio">Transporte/Envio</option>
+                    <option value="Outros">Outros</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field">
+                <label>Descrição</label>
+                <input type="text" id="despDescricao" placeholder="Ex.: Bobina PLA 1kg - Creality" />
+              </div>
+              <div class="field">
+                <label>Valor (R$)</label>
+                <input type="text" inputmode="decimal" id="despValor" placeholder="Ex.: 95,00" />
+              </div>
+            </div>
+
+            <div class="btn-row">
+              <button class="btn btn-primary" id="btnAddDespesa">Adicionar despesa</button>
+            </div>
+
+            <hr style="border: none; border-top: 1px solid rgba(31, 41, 55, 0.9); margin: 14px 0;" />
+
+            <div class="card-header" style="margin-bottom: 6px;">
+              <div>
+                <div class="card-title">Contas Fixas Mensais</div>
+                <div class="card-subtitle">Aluguel, internet, assinaturas...</div>
+              </div>
+              <button class="btn btn-soft btn-sm" id="btnAddContaFixa">+ Conta fixa</button>
+            </div>
+            <div id="despFixasContainer" class="field-group"></div>
+            <div class="btn-row">
+              <button class="btn btn-primary btn-sm" id="btnLancarFixas">Lançar despesas fixas deste mês</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Lançamentos</div>
+              </div>
+              <span class="chip">LocalStorage</span>
+            </div>
+
+            <div class="field-group">
+              <div class="field-row">
+                <div class="field">
+                  <label>Filtrar por mês</label>
+                  <select id="filtroMesDespesa">
+                    <option value="">Todos</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Filtrar por categoria</label>
+                  <select id="filtroCategoriaDespesa">
+                    <option value="">Todas</option>
+                    <option value="Filamento/Material">Filamento/Material</option>
+                    <option value="Energia">Energia</option>
+                    <option value="Manutenção/Peças">Manutenção/Peças</option>
+                    <option value="Equipamento">Equipamento</option>
+                    <option value="Embalagem">Embalagem</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="Taxas/Impostos">Taxas/Impostos</option>
+                    <option value="Aluguel/Internet">Aluguel/Internet</option>
+                    <option value="Transporte/Envio">Transporte/Envio</option>
+                    <option value="Outros">Outros</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <table class="table-custom">
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Categoria</th>
+                  <th>Descrição</th>
+                  <th>Valor</th>
+                  <th>Ação</th>
+                </tr>
+              </thead>
+              <tbody id="despesasBody"></tbody>
+            </table>
+
+            <div class="storage-info" style="margin-top: 12px;">
+              <strong>Total no período:</strong> <span id="despTotalPeriodo">R$ 0,00</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB: CONTROLE -->
+      <section class="tab-panel" id="tab-controle">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Histórico de Orçamentos</div>
+              <div class="card-subtitle">Controle de vendas e pagamentos</div>
+            </div>
+            <span class="chip">LocalStorage</span>
+          </div>
+
+          <div class="field-group">
+            <div class="field-row">
+              <div class="field">
+                <label>Filtrar por mês</label>
+                <select id="filtroMesControl">
+                  <option value="">Todos</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Status</label>
+                <select id="filtroStatusControl">
+                  <option value="">Todos</option>
+                  <option value="PENDENTE">Pendente</option>
+                  <option value="PAGO">Pago</option>
+                  <option value="CANCELADO">Cancelado</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <table class="table-custom">
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Cliente</th>
+                <th>Projeto</th>
+                <th>Preço</th>
+                <th>Status</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="controlBody"></tbody>
+          </table>
+
+          <div class="storage-info" style="margin-top: 12px;">
+            <strong>Resumo:</strong> Faturamento: <span id="sumFaturamento">R$ 0,00</span> |
+            Pago: <span id="sumPago">R$ 0,00</span> |
+            Pendente: <span id="sumPendente">R$ 0,00</span>
+          </div>
+
+          <div class="storage-info" style="margin-top: 8px;">
+            <strong>Financeiro do período:</strong> Despesas: <span id="sumDespesas">R$ 0,00</span> |
+            Lucro líquido (pago − despesas): <span id="sumLucroLiquido">R$ 0,00</span>
+          </div>
+
+          <div style="margin-top: 12px;">
+            <div class="card-subtitle" style="margin-bottom: 6px;">Despesas por categoria (período)</div>
+            <table class="table-custom">
+              <thead><tr><th>Categoria</th><th>Total</th></tr></thead>
+              <tbody id="despesasPorCategoriaBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB: CONFIG -->
+      <section class="tab-panel" id="tab-config">
+        <div class="panel-grid">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Logo da Empresa</div>
+                <div class="card-subtitle">Para aparecer no PDF do orçamento</div>
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Upload de logo (PNG/JPG)</label>
+              <input type="file" id="uploadLogo" accept="image/png,image/jpeg" />
+            </div>
+            <div class="logo-preview" id="logoPreview"></div>
+            <button class="btn btn-ghost btn-sm" id="btnRemoverLogo">Remover logo</button>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Dados de Contato</div>
+              </div>
+            </div>
+
+            <div class="field-group">
+              <div class="field">
+                <label>Nome/Estúdio</label>
+                <input type="text" id="cfgNome" placeholder="Studio FH3D" />
+              </div>
+              <div class="field">
+                <label>WhatsApp</label>
+                <input type="text" id="cfgWhatsapp" placeholder="(41) 99966-9192" />
+              </div>
+              <div class="field">
+                <label>E-mail</label>
+                <input type="email" id="cfgEmail" placeholder="contato@studio.com" />
+              </div>
+              <div class="field">
+                <label>Instagram</label>
+                <input type="text" id="cfgInstagram" placeholder="@seu_instagram" />
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Dados PIX</div>
+              </div>
+            </div>
+
+            <div class="field-group">
+              <div class="field">
+                <label>Chave PIX</label>
+                <input type="text" id="cfgPixChave" placeholder="CPF, e-mail ou chave aleatória" />
+              </div>
+              <div class="field">
+                <label>Tipo de chave</label>
+                <select id="cfgPixTipo">
+                  <option value="cpf">CPF</option>
+                  <option value="email">E-mail</option>
+                  <option value="telefone">Telefone</option>
+                  <option value="aleatorio">Chave aleatória</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Titular</label>
+                <input type="text" id="cfgPixTitular" placeholder="Seu nome completo" />
+              </div>
+            </div>
+
+            <div class="pix-code" id="pixDisplay" style="display: none;">
+              <!-- PIX será exibido aqui -->
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Textos Personalizados</div>
+              </div>
+            </div>
+
+            <div class="field-group">
+              <div class="field">
+                <label>Sobre modificações</label>
+                <textarea id="cfgTextoModificacoes" placeholder="Texto sobre mudanças no projeto..."></textarea>
+              </div>
+              <div class="field">
+                <label>Validade do orçamento</label>
+                <textarea id="cfgTextoValidade" placeholder="Quantos dias é válido..."></textarea>
+              </div>
+              <div class="field">
+                <label>Observações gerais</label>
+                <textarea id="cfgTextoObservacoes" placeholder="Dicas e avisos..."></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="btn-row">
+            <button class="btn btn-primary" id="btnSalvarConfig">Salvar configurações</button>
+            <button class="btn btn-ghost btn-sm" id="btnResetConfig">Restaurar padrão</button>
+            <button class="btn btn-ghost btn-sm" id="btnExportarDados">Exportar dados</button>
+            <button class="btn btn-danger btn-sm" id="btnLimparTudo">Limpar TUDO</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      Precificador 3D Pro · <span>v3.0</span> · Para gestão de impressão 3D
+    </footer>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <script>
+    // ========== UTILITÁRIOS ==========
+    const money = (v) => "R$ " + (isFinite(v) ? v : 0).toFixed(2).replace(".", ",");
+    const toNum = (v) => {
+      if (typeof v === "string") {
+        const n = parseFloat(v.replace(",", ".").trim());
+        return isNaN(n) ? 0 : n;
+      }
+      return isFinite(v) ? v : 0;
+    };
+
+    const pad2 = (n) => String(n).padStart(2, "0");
+    let fotosOrcamento = [];
+    let orcamentoEmEdicaoId = null;
+
+    // ========== TABS ==========
+    document.querySelectorAll(".tab-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const target = btn.dataset.tab;
+        document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+        document.querySelectorAll(".tab-panel").forEach((p) => p.classList.remove("active"));
+        btn.classList.add("active");
+        document.getElementById(`tab-${target}`).classList.add("active");
+      });
+    });
+
+    // ========== STORAGE KEYS ==========
+    const STORAGE = {
+      CONFIG: "fh3d_config",
+      CUSTOS: "fh3d_custos",
+      ESTOQUE: "fh3d_estoque",
+      CALIBRACOES: "fh3d_calibracoes",
+      PRAZOS: "fh3d_prazos",
+      ORCAMENTOS: "fh3d_orcamentos",
+      LOGO: "fh3d_logo",
+      DESPESAS: "fh3d_despesas",
+      DESPESAS_FIXAS: "fh3d_despesas_fixas",
+    };
+
+    // ========== CONFIG INICIAL ==========
+    function carregarConfig() {
+      try {
+        const raw = localStorage.getItem(STORAGE.CONFIG);
+        return raw ? JSON.parse(raw) : getConfigPadrao();
+      } catch (e) {
+        console.error("Erro ao carregar config:", e);
+        return getConfigPadrao();
+      }
+    }
+
+    function getConfigPadrao() {
+      return {
+        nome: "Studio FH3D",
+        whatsapp: "(41) 99966-9192",
+        email: "fho3dstudio@gmail.com",
+        instagram: "@fho3d_studio",
+        pixChave: "",
+        pixTipo: "cpf",
+        pixTitular: "",
+        textoMod: "Este orçamento contempla até 2 rodadas de ajustes...",
+        textoVal: "Este orçamento é válido por 7 dias...",
+        textoObs: "Os prazos serão confirmados após aprovação...",
+      };
+    }
+
+    let configAtual = carregarConfig();
+
+    function salvarConfig(cfg) {
+      try {
+        localStorage.setItem(STORAGE.CONFIG, JSON.stringify(cfg));
+        configAtual = cfg;
+      } catch (e) {
+        console.error("Erro ao salvar config:", e);
+      }
+    }
+
+    // ========== TAB: ORÇAMENTO ==========
+    const orcItensContainer = document.getElementById("orcItensContainer");
+
+    function addOrcItem() {
+      const item = document.createElement("div");
+      item.className = "item-row";
+      item.innerHTML = `
+        <div class="field-group">
+          <div class="field-row">
+            <div class="field">
+              <label>Nome do item <span class="req">*</span></label>
+              <input type="text" class="orc-item-nome" placeholder="Ex.: Chaveiro" />
+            </div>
+            <div class="field">
+              <label>Quantidade <span class="req">*</span></label>
+              <input type="text" inputmode="decimal" class="orc-item-qtd" min="1" value="1" />
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label>Peso unitário (g) <span class="req">*</span></label>
+              <input type="text" inputmode="decimal" class="orc-item-peso" min="0" step="0.1" placeholder="Ex.: 50" />
+            </div>
+            <div class="field">
+              <label>Material <span class="req">*</span></label>
+              <select class="orc-item-material">
+                <option value="PLA">PLA</option>
+                <option value="PETG">PETG</option>
+                <option value="ABS">ABS</option>
+                <option value="RESINA">Resina</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Filamento do estoque <span class="req">*</span></label>
+            <select class="orc-item-filamento">${opcoesFilamento()}</select>
+            <small style="color: var(--text-muted);">O custo usa este rolo e as gramas do fatiador serão baixadas ao salvar o pedido.</small>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label>Tempo impressão - Horas <span class="req">*</span></label>
+              <input type="text" inputmode="decimal" class="orc-item-horas" min="0" step="1" placeholder="Ex.: 2" />
+            </div>
+            <div class="field">
+              <label>Tempo impressão - Minutos</label>
+              <input type="text" inputmode="decimal" class="orc-item-minutos" min="0" max="59" step="1" placeholder="Ex.: 30" />
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field" style="grid-column: 1 / -1;">
+              <button type="button" class="btn btn-danger btn-sm" onclick="this.closest('.item-row').remove()" style="width: 100%;">
+                🗑️ Remover este item
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      orcItensContainer.appendChild(item);
+    }
+
+    function opcoesFilamento(material = "") {
+      const estoque = carregarEstoque();
+      const opcoes = estoque.filter(f => !material || f.tipo === material);
+      return `<option value="">Selecione um filamento cadastrado</option>` + opcoes.map(f =>
+        `<option value="${f.id}">${f.fabricante} — ${f.cor} (${f.tipo}) · ${f.peso.toFixed(1)}g</option>`
+      ).join("");
+    }
+
+    function atualizarSeletoresFilamento() {
+      orcItensContainer.querySelectorAll(".item-row").forEach(row => {
+        const material = row.querySelector(".orc-item-material").value;
+        const select = row.querySelector(".orc-item-filamento");
+        const valor = select.value;
+        select.innerHTML = opcoesFilamento(material);
+        select.value = valor;
+        if (!select.value) select.value = "";
+      });
+    }
+
+    document.getElementById("orcFotos").addEventListener("change", async (event) => {
+      const arquivos = Array.from(event.target.files || []);
+      fotosOrcamento = await Promise.all(arquivos.map(arquivo => new Promise((resolve, reject) => {
+        const leitor = new FileReader();
+        leitor.onload = () => resolve(leitor.result);
+        leitor.onerror = reject;
+        leitor.readAsDataURL(arquivo);
+      })));
+      document.getElementById("orcFotosPreview").innerHTML = fotosOrcamento.map(src =>
+        `<img src="${src}" alt="Prévia do produto" style="width:72px;height:72px;object-fit:cover;border-radius:6px;border:1px solid var(--border);">`
+      ).join("");
+    });
+
+    document.getElementById("btnAddOrcItem").addEventListener("click", addOrcItem);
+    orcItensContainer.addEventListener("change", (event) => {
+      if (event.target.classList.contains("orc-item-material")) {
+        const row = event.target.closest(".item-row");
+        const select = row.querySelector(".orc-item-filamento");
+        select.innerHTML = opcoesFilamento(event.target.value);
+      }
+    });
+    addOrcItem();
+
+    // ========== FÓRMULA DE PRECIFICAÇÃO PROFISSIONAL ==========
+    function calcularPrecificacaoCompleta(itens, custos, impressora) {
+      /*
+      FÓRMULA PROFISSIONAL DE PRECIFICAÇÃO 3D
+
+      Custo Total = Custo Material + Custo Energia + Custo Máquina + Custo Pós-Processamento
+
+      1. CUSTO MATERIAL
+         - Peso total com desperdício (5-10%)
+         - Valor do filamento R$/kg
+
+      2. CUSTO DE ENERGIA
+         - Tempo impressão × Consumo máquina (kW) × Tarifa energia (R$/kWh)
+
+      3. CUSTO DA MÁQUINA (Depreciação + Manutenção)
+         - Tempo impressão × Taxa horária da máquina
+
+      4. PÓS-PROCESSAMENTO
+         - Limpeza, apoio, pintura, acabamento
+
+      PREÇO FINAL = (Custo Total × Margem Lucro) + Embalagem
+      */
+
+      if (!itens || itens.length === 0) return null;
+
+      // Configurações padrão por impressora
+      const configImpressora = {
+        "K1C": { consumo: custos.consumoK1C || 0.25, desperdicio: 0.08, nozzle: 0.4 },
+        "KOBRA": { consumo: custos.consumoKobra || 0.30, desperdicio: 0.10, nozzle: 0.4 },
+        "AMBAS": { consumo: (toNum(custos.consumoK1C) + toNum(custos.consumoKobra)) / 2 || 0.275, desperdicio: 0.09, nozzle: 0.4 }
+      };
+
+      const configAtiva = configImpressora[impressora] || configImpressora["K1C"];
+
+      // 1. CÁLCULOS DE PESO E TEMPO
+      let pesoTotalGramas = 0;
+      let tempoTotalHoras = 0;
+      let tempoTotalMinutos = 0;
+      const materiais = new Set();
+
+      let tempoTotalHorasDecimal = 0;
+
+      itens.forEach(item => {
+        // Aceita tempoEmHoras (novo formato) ou tempo (compatibilidade)
+        const tempoUnit = (item.tempoEmHoras != null ? item.tempoEmHoras : (item.tempo || 0));
+        pesoTotalGramas += item.peso * item.qtd;
+        tempoTotalHorasDecimal += tempoUnit * item.qtd;
+        if (materiais.size < 3) materiais.add(item.material);
+      });
+
+      // Decompor tempo total decimal em horas + minutos (apenas para exibição)
+      tempoTotalHoras = Math.floor(tempoTotalHorasDecimal);
+      tempoTotalMinutos = Math.round((tempoTotalHorasDecimal - tempoTotalHoras) * 60);
+      if (tempoTotalMinutos >= 60) {
+        tempoTotalHoras += Math.floor(tempoTotalMinutos / 60);
+        tempoTotalMinutos = tempoTotalMinutos % 60;
+      }
+
+      const pesoTotalKg = pesoTotalGramas / 1000;
+
+      // 2. CUSTO DE MATERIAL (COM DESPERDÍCIO)
+      const custoFilamento = toNum(custos.custoFilamento) || 95;
+      const desperdicio = configAtiva.desperdicio; // 8-10%
+      const pesoComDesperdicio = pesoTotalKg * (1 + desperdicio);
+      const custoMaterial = itens.reduce((total, item) => {
+        const precoKg = toNum(item.precoFilamento) || custoFilamento;
+        return total + ((item.peso * item.qtd / 1000) * (1 + desperdicio) * precoKg);
+      }, 0);
+
+      // 3. CUSTO DE ENERGIA (kWh)
+      const tarifaEnergia = toNum(custos.tarifaEnergia) || 0.85;
+      const consumoKw = configAtiva.consumo;
+      const kwhGasto = tempoTotalHorasDecimal * consumoKw;
+      const custoEnergia = kwhGasto * tarifaEnergia;
+
+      // 4. CUSTO DE MÁQUINA (Depreciação + Manutenção)
+      const depreciacaoHora = toNum(custos.depreciacao) || 2.5;
+      const manutencaoHora = toNum(custos.manutencao) || 0.5;
+      const custoMaquina = tempoTotalHorasDecimal * (depreciacaoHora + manutencaoHora);
+
+      // 5. CUSTO DE PÓS-PROCESSAMENTO (estimado por item)
+      // Limpeza de apoios, acabamento suave
+      let custoPosProcessamento = 0;
+      const materialMultiplier = {
+        "PLA": 0.5,      // Fácil de remover
+        "PETG": 1.0,     // Normal
+        "ABS": 2.0,      // Precisa mais acabamento
+        "RESINA": 3.0    // Precisa lavagem, cura, acabamento
+      };
+
+      itens.forEach(item => {
+        const multiplicador = materialMultiplier[item.material] || 1.0;
+        custoPosProcessamento += item.qtd * (item.peso / 100) * multiplicador; // R$ por grama × material
+      });
+
+      // 6. CUSTO BASE TOTAL
+      const custoBase = custoMaterial + custoEnergia + custoMaquina + custoPosProcessamento;
+
+      // 7. MARGEM DE LUCRO
+      const percentualLucro = toNum(custos.lucroPadrao) || 30;
+      const embalagem = toNum(custos.embalagem) || 10;
+
+      const precoSemLucro = custoBase + embalagem;
+      const precoComLucro = precoSemLucro * (1 + percentualLucro / 100);
+
+      // 8. ARREDONDAMENTO PROFISSIONAL
+      // Arredondar para múltiplo de 5 (estratégia comercial)
+      const precoFinal = Math.ceil(precoComLucro / 5) * 5;
+
+      return {
+        // Inputs
+        itens,
+        impressora,
+        pesoTotalGramas,
+        pesoTotalKg,
+        pesoComDesperdicio,
+        tempoTotalHoras,
+        tempoTotalMinutos,
+        tempoTotalHorasDecimal,
+        kwhGasto,
+
+        // Custos detalhados
+        custoFilamento,
+        custoMaterial,
+        custoEnergia,
+        custoMaquina,
+        custoPosProcessamento,
+        custoBase,
+        embalagem,
+        precoSemLucro,
+
+        // Resultado final
+        percentualLucro,
+        precoComLucro,
+        precoFinal,
+        lucroReal: precoFinal - custoBase,
+        margemLucro: ((precoFinal - custoBase) / precoFinal * 100).toFixed(1),
+      };
+    }
+
+    document.getElementById("btnCalcularOrc").addEventListener("click", () => {
+      const projeto = document.getElementById("orcProjeto").value.trim();
+      if (!projeto) {
+        alert("❌ Informe o projeto");
+        return;
+      }
+
+      // Coletar itens com validação
+      const itens = [];
+      let erroValidacao = false;
+
+      orcItensContainer.querySelectorAll(".item-row").forEach((row, idx) => {
+        const nome = row.querySelector(".orc-item-nome").value.trim();
+        const qtd = toNum(row.querySelector(".orc-item-qtd").value);
+        const peso = toNum(row.querySelector(".orc-item-peso").value);
+        const horas = toNum(row.querySelector(".orc-item-horas").value);
+        const minutos = toNum(row.querySelector(".orc-item-minutos").value);
+        const material = row.querySelector(".orc-item-material").value;
+        const filamentoId = row.querySelector(".orc-item-filamento").value;
+        const filamento = carregarEstoque().find(f => String(f.id) === String(filamentoId));
+
+        // Validação
+        if (!nome) {
+          alert(`❌ Item ${idx + 1}: Informe o nome`);
+          erroValidacao = true;
+          return;
+        }
+        if (!peso) {
+          alert(`❌ Item "${nome}": Informe o peso em gramas`);
+          erroValidacao = true;
+          return;
+        }
+        if (!horas && !minutos) {
+          alert(`❌ Item "${nome}": Informe o tempo de impressão (horas ou minutos)`);
+          erroValidacao = true;
+          return;
+        }
+        if (!filamentoId || !filamento) {
+          alert(`❌ Item "${nome}": selecione o filamento do estoque`);
+          erroValidacao = true;
+          return;
+        }
+        if (filamento.peso < peso * qtd) {
+          alert(`❌ Estoque insuficiente para "${nome}". Disponível: ${filamento.peso.toFixed(1)}g.`);
+          erroValidacao = true;
+          return;
+        }
+
+        // Converter tempo para horas decimais
+        const tempoEmHoras = horas + minutos / 60;
+
+        if (peso > 0 && tempoEmHoras > 0) {
+          itens.push({
+            nome,
+            qtd,
+            peso,
+            horas,
+            minutos,
+            tempoEmHoras,
+            material,
+            filamentoId: filamento.id,
+            filamentoNome: `${filamento.fabricante} — ${filamento.cor}`,
+            precoFilamento: filamento.preco,
+          });
+        }
+      });
+
+      if (erroValidacao) return;
+
+      if (!itens.length) {
+        alert("❌ Adicione pelo menos um item com peso e tempo");
+        return;
+      }
+
+      // Carregar custos automaticamente
+      const impressora = document.getElementById("orcImpressora").value;
+      const desconto = toNum(document.getElementById("orcDesconto").value);
+      const prazo = toNum(document.getElementById("orcPrazo").value);
+      const modelagem = toNum(document.getElementById("orcModelagem").value);
+      const pintura = toNum(document.getElementById("orcPintura").value);
+      const servicos = modelagem + pintura;
+
+      const custosConfig = carregarCustos();
+
+      // Validar se custos foram configurados
+      if (!custosConfig.custoFilamento || custosConfig.custoFilamento === 0) {
+        alert("⚠️ Configure o custo do filamento em ⚙️ Custos primeiro!");
+        return;
+      }
+
+      const resultado = calcularPrecificacaoCompleta(itens, custosConfig, impressora);
+
+      if (!resultado) {
+        alert("❌ Erro no cálculo");
+        return;
+      }
+
+      const precoFinalComDesconto = Math.max(0, resultado.precoFinal + servicos - desconto);
+      const lucroRealComDesconto = precoFinalComDesconto - resultado.custoBase;
+
+      // Atualizar UI
+      document.getElementById("orcOutCustoTotal").textContent = money(resultado.custoBase);
+      document.getElementById("orcOutPrecoSugerido").textContent = money(resultado.precoComLucro);
+      document.getElementById("orcOutPrecoFinal").textContent = money(precoFinalComDesconto);
+      document.getElementById("orcOutLucro").textContent = money(lucroRealComDesconto);
+
+      // Resumo para o cliente (sem custos internos nem lucro)
+      const resumo = `╔════════════════════════════════════════╗
+║         ORÇAMENTO - IMPRESSÃO 3D        ║
+╚════════════════════════════════════════╝
+
+📋 PROJETO: ${projeto}
+👤 CLIENTE: ${document.getElementById("orcCliente").value || "(não informado)"}
+📅 DATA: ${new Date().toLocaleDateString("pt-BR")}
+⏳ PRAZO DE ENTREGA: ${prazo ? "até " + prazo + " dia(s) após confirmação" : "a combinar"}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ITENS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${itens.map(i => `• ${i.qtd}x ${i.nome} (${i.material})`).join("\n")}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+VALOR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Impressão 3D:        ${money(resultado.precoFinal)}
+${modelagem ? `Modelagem 3D:        ${money(modelagem)}\n` : ""}${pintura ? `Pintura/acabamento:  ${money(pintura)}\n` : ""}${desconto ? `Desconto:            - ${money(desconto)}\n` : ""}💵 VALOR TOTAL:       ${money(precoFinalComDesconto)}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Orçamento válido por 7 dias.
+Sujeito a alterações conforme mudanças no projeto.`;
+
+      document.getElementById("orcResumo").value = resumo;
+
+      window.ultimoOrcamento = {
+        cliente: document.getElementById("orcCliente").value,
+        projeto,
+        descricao: document.getElementById("orcDescricao").value,
+        impressora,
+        itens,
+        ...resultado,
+        desconto,
+        prazo,
+        modelagem,
+        pintura,
+        precoImpressao: resultado.precoFinal,
+        precoFinal: precoFinalComDesconto,
+        lucro: lucroRealComDesconto,
+        data: new Date(),
+        fotos: fotosOrcamento,
+      };
+
+      alert("✅ Orçamento calculado com sucesso!");
+    });
+
+    document.getElementById("btnLimparOrc").addEventListener("click", () => {
+      document.getElementById("orcCliente").value = "";
+      document.getElementById("orcProjeto").value = "";
+      document.getElementById("orcDescricao").value = "";
+      document.getElementById("orcDesconto").value = "";
+      document.getElementById("orcPrazo").value = "";
+      document.getElementById("orcModelagem").value = "";
+      document.getElementById("orcPintura").value = "";
+      orcItensContainer.innerHTML = "";
+      addOrcItem();
+      document.getElementById("orcResumo").value = "";
+      document.getElementById("orcFotos").value = "";
+      document.getElementById("orcFotosPreview").innerHTML = "";
+      fotosOrcamento = [];
+      orcamentoEmEdicaoId = null;
+    });
+
+    function atualizarTelasRelacionadas() {
+      renderEstoque(); atualizarSeletoresFilamento(); renderControle(); renderPrazos(); atualizarDashboard();
+    }
+
+    function restaurarEstoqueDoOrcamento(orc) {
+      if (!orc?.estoqueBaixado || !Array.isArray(orc.consumoEstoque)) return;
+      const estoque = carregarEstoque();
+      orc.consumoEstoque.forEach(c => { const f = estoque.find(f => String(f.id) === String(c.filamentoId)); if (f) f.peso += c.gramas; });
+      salvarEstoque(estoque); orc.estoqueBaixado = false;
+    }
+
+    function baixarEstoqueDoOrcamento(orc) {
+      const estoque = carregarEstoque();
+      const consumo = orc.itens.map(i => ({ filamentoId: i.filamentoId, gramas: i.peso * i.qtd }));
+      if (consumo.some(c => { const f = estoque.find(f => String(f.id) === String(c.filamentoId)); return !f || f.peso < c.gramas; })) throw new Error("Estoque insuficiente para concluir o pedido.");
+      consumo.forEach(c => estoque.find(f => String(f.id) === String(c.filamentoId)).peso -= c.gramas);
+      salvarEstoque(estoque); orc.consumoEstoque = consumo; orc.estoqueBaixado = true;
+    }
+
+    function sincronizarPrazoDoOrcamento(orc) {
+      const prazos = carregarPrazos(); const idx = prazos.findIndex(p => String(p.orcId) === String(orc.id)); const dias = toNum(orc.prazo);
+      if (!dias) { if (idx >= 0) prazos.splice(idx, 1); }
+      else {
+        const d = new Date(orc.data); d.setDate(d.getDate() + dias);
+        prazos[idx >= 0 ? idx : prazos.length] = { id: idx >= 0 ? prazos[idx].id : "prazo_" + orc.id, orcId: orc.id, projeto: orc.projeto, cliente: orc.cliente || "—", descricao: `Entrega do orçamento (${money(orc.precoFinal)})`, dataPrazo: `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`, status: orc.status === "CANCELADO" ? "CANCELADO" : (idx >= 0 ? prazos[idx].status : "PENDENTE"), data: idx >= 0 ? prazos[idx].data : new Date().toISOString() };
+      }
+      salvarPrazos(prazos);
+    }
+
+    document.getElementById("btnSalvarOrcamento").addEventListener("click", () => {
+      if (!window.ultimoOrcamento) {
+        alert("Calcule um orçamento primeiro");
+        return;
+      }
+
+      try {
+        const orcamentos = JSON.parse(localStorage.getItem(STORAGE.ORCAMENTOS)) || [];
+        const existente = orcamentos.find(o => String(o.id) === String(orcamentoEmEdicaoId));
+        if (existente) restaurarEstoqueDoOrcamento(existente);
+        const orcamento = { id: existente?.id || Date.now(), ...window.ultimoOrcamento, status: existente?.status || "PENDENTE", pago: existente?.pago || false };
+        baixarEstoqueDoOrcamento(orcamento);
+        if (existente) Object.assign(existente, orcamento); else orcamentos.push(orcamento);
+        localStorage.setItem(STORAGE.ORCAMENTOS, JSON.stringify(orcamentos));
+
+        sincronizarPrazoDoOrcamento(orcamento);
+        orcamentoEmEdicaoId = null;
+        atualizarTelasRelacionadas();
+        alert("✅ Pedido salvo, prazo sincronizado e estoque baixado conforme os gramas informados.");
+      } catch (e) {
+        console.error("Erro ao salvar:", e);
+        alert("❌ Erro ao salvar o orçamento.");
+      }
+    });
+
+    // ========== TAB: CUSTOS ==========
+    function carregarCustos() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE.CUSTOS)) || {};
+      } catch {
+        return {};
+      }
+    }
+
+    function salvarCustos(custos) {
+      localStorage.setItem(STORAGE.CUSTOS, JSON.stringify(custos));
+    }
+
+    let custosAtual = carregarCustos();
+
+    function preencherCustos(custos) {
+      document.getElementById("cfgCustoFilamento").value = custos.custoFilamento || "";
+      document.getElementById("cfgTarifaEnergia").value = custos.tarifaEnergia || "";
+      document.getElementById("cfgConsumoK1C").value = custos.consumoK1C || "";
+      document.getElementById("cfgConsumoKobra").value = custos.consumoKobra || "";
+      document.getElementById("cfgDepreciacao").value = custos.depreciacao || "";
+      document.getElementById("cfgManutencao").value = custos.manutencao || "";
+      document.getElementById("cfgLucroPadrao").value = custos.lucroPadrao || "";
+      document.getElementById("cfgEmbalagem").value = custos.embalagem || "";
+    }
+
+    preencherCustos(custosAtual);
+
+    document.getElementById("btnSalvarCustos").addEventListener("click", () => {
+      custosAtual = {
+        custoFilamento: toNum(document.getElementById("cfgCustoFilamento").value),
+        tarifaEnergia: toNum(document.getElementById("cfgTarifaEnergia").value),
+        consumoK1C: toNum(document.getElementById("cfgConsumoK1C").value),
+        consumoKobra: toNum(document.getElementById("cfgConsumoKobra").value),
+        depreciacao: toNum(document.getElementById("cfgDepreciacao").value),
+        manutencao: toNum(document.getElementById("cfgManutencao").value),
+        lucroPadrao: toNum(document.getElementById("cfgLucroPadrao").value),
+        embalagem: toNum(document.getElementById("cfgEmbalagem").value),
+      };
+      salvarCustos(custosAtual);
+      alert("Custos salvos!");
+    });
+
+    document.getElementById("btnResetCustos").addEventListener("click", () => {
+      if (confirm("Limpar todos os custos?")) {
+        localStorage.removeItem(STORAGE.CUSTOS);
+        custosAtual = {};
+        preencherCustos({});
+      }
+    });
+
+    // ========== TAB: ESTOQUE ==========
+    function carregarEstoque() {
+      try {
+        const estoque = JSON.parse(localStorage.getItem(STORAGE.ESTOQUE)) || [];
+        let alterado = false;
+        estoque.forEach(f => { if (!f.id) { f.id = "fil_" + Date.now() + "_" + Math.random().toString(36).slice(2); alterado = true; } });
+        if (alterado) salvarEstoque(estoque);
+        return estoque;
+      } catch {
+        return [];
+      }
+    }
+
+    function salvarEstoque(estoque) {
+      localStorage.setItem(STORAGE.ESTOQUE, JSON.stringify(estoque));
+    }
+
+    function renderEstoque() {
+      const estoque = carregarEstoque();
+      const container = document.getElementById("estoqueContainer");
+      const tipo = document.getElementById("filtroTipoFilamento").value;
+      const fab = document.getElementById("filtroFabricante").value.toLowerCase();
+
+      const filtrado = estoque.filter(f =>
+        (!tipo || f.tipo === tipo) &&
+        (!fab || f.fabricante.toLowerCase().includes(fab))
+      );
+
+      container.innerHTML = "";
+
+      if (!filtrado.length) {
+        container.innerHTML = '<div class="alert alert-info">Nenhum filamento cadastrado</div>';
+        atualizarResumoEstoque([]);
+        return;
+      }
+
+      filtrado.forEach((fil) => {
+        const card = document.createElement("div");
+        card.className = "stock-card";
+        const statusCor = fil.peso > 200 ? "var(--accent-green)" : fil.peso > 100 ? "#f59e0b" : "var(--accent-red)";
+
+        card.innerHTML = `
+          <div class="stock-card-header">
+            <div class="stock-card-title">${fil.fabricante} - ${fil.cor} (${fil.tipo})</div>
+            <span class="status-badge" style="border-color: ${statusCor}; color: ${statusCor};">
+              <span class="status-dot" style="background: ${statusCor};"></span>
+              ${fil.peso.toFixed(1)}g
+            </span>
+          </div>
+          <div class="stock-card-info">
+            <span>Preço: ${money(fil.preco)}/kg</span>
+            <span>Valor: ${money(fil.peso / 1000 * fil.preco)}</span>
+            <span>Calibrações: ${fil.calibracoes || 0}</span>
+          </div>
+          <div class="field-group" style="margin-top: 8px;">
+            <div class="field-row">
+              <button class="btn btn-ghost btn-sm" onclick="editarFilamento('${fil.id}')">Editar</button>
+              <button class="btn btn-danger btn-sm" onclick="removerFilamento('${fil.id}')">Remover</button>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      atualizarResumoEstoque(filtrado);
+    }
+
+    function atualizarResumoEstoque(estoque) {
+      let totalPeso = 0, totalValor = 0;
+      estoque.forEach(f => {
+        totalPeso += f.peso / 1000;
+        totalValor += (f.peso / 1000) * f.preco;
+      });
+
+      document.getElementById("estoqueTotalQtd").textContent = estoque.length;
+      document.getElementById("estoqueTotalPeso").textContent = totalPeso.toFixed(2);
+      document.getElementById("estoqueTotalValor").textContent = money(totalValor);
+    }
+
+    window.removerFilamento = (id) => {
+      if (confirm("Remover filamento?")) {
+        const estoque = carregarEstoque();
+        salvarEstoque(estoque.filter(f => String(f.id) !== String(id)));
+        renderEstoque();
+        atualizarSeletoresFilamento();
+      }
+    };
+
+    window.editarFilamento = (id) => {
+      const estoque = carregarEstoque();
+      const f = estoque.find(f => String(f.id) === String(id));
+      const nPeso = prompt("Novo peso (g):", f.peso);
+      if (nPeso !== null) {
+        f.peso = toNum(nPeso);
+        salvarEstoque(estoque);
+        renderEstoque();
+      }
+    };
+
+    document.getElementById("btnAddFilamento").addEventListener("click", () => {
+      const fab = prompt("Fabricante:");
+      if (!fab) return;
+      const cor = prompt("Cor:");
+      if (!cor) return;
+      const tipo = prompt("Tipo (PLA/PETG/ABS/RESINA):");
+      if (!tipo) return;
+      const peso = toNum(prompt("Peso (g):"));
+      const preco = toNum(prompt("Preço/kg (R$):"));
+
+      const estoque = carregarEstoque();
+      estoque.push({ fabricante: fab, cor, tipo, peso, preco, calibracoes: 0, data: new Date() });
+      estoque[estoque.length - 1].id = "fil_" + Date.now() + "_" + Math.random().toString(36).slice(2);
+      salvarEstoque(estoque);
+      renderEstoque();
+      atualizarSeletoresFilamento();
+    });
+
+    ["filtroTipoFilamento", "filtroFabricante"].forEach(id => {
+      document.getElementById(id).addEventListener("change", renderEstoque);
+      document.getElementById(id).addEventListener("input", renderEstoque);
+    });
+
+    renderEstoque();
+
+    // ========== TAB: CALIBRAÇÕES ==========
+    function carregarCalibracoes() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE.CALIBRACOES)) || { K1C: [], KOBRA: [] };
+      } catch {
+        return { K1C: [], KOBRA: [] };
+      }
+    }
+
+    function salvarCalibracoes(calib) {
+      localStorage.setItem(STORAGE.CALIBRACOES, JSON.stringify(calib));
+    }
+
+    function renderCalibracoes() {
+      const calib = carregarCalibracoes();
+
+      const renderImpressora = (tipo, container) => {
+        container.innerHTML = "";
+        const cals = calib[tipo] || [];
+
+        if (!cals.length) {
+          container.innerHTML = '<div class="alert alert-info">Nenhuma calibração salva</div>';
+          return;
+        }
+
+        cals.forEach((c, idx) => {
+          const card = document.createElement("div");
+          card.className = "item-row";
+          card.innerHTML = `
+            <strong>${c.nome}</strong> - ${c.material}<br/>
+            <small>Temp: ${c.temp}°C | Layer: ${c.layer}mm | Speed: ${c.speed}mm/s</small><br/>
+            <small style="color: var(--text-muted);">Z-offset: ${c.zoffset} | Nozzle: ${c.nozzle}mm</small>
+            <div class="btn-row" style="margin-top: 6px;">
+              <button class="btn btn-soft btn-sm" onclick="usarCalib('${tipo}', ${idx})">Usar</button>
+              <button class="btn btn-danger btn-sm" onclick="removerCalib('${tipo}', ${idx})">Remover</button>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+      };
+
+      renderImpressora("K1C", document.getElementById("calibracoesK1CContainer"));
+      renderImpressora("KOBRA", document.getElementById("calibracoesKobraContainer"));
+    }
+
+    window.usarCalib = (tipo, idx) => {
+      const calib = carregarCalibracoes();
+      const c = calib[tipo][idx];
+      alert(`✅ Calibração "${c.nome}" selecionada para ${tipo}`);
+    };
+
+    window.removerCalib = (tipo, idx) => {
+      if (confirm("Remover calibração?")) {
+        const calib = carregarCalibracoes();
+        calib[tipo].splice(idx, 1);
+        salvarCalibracoes(calib);
+        renderCalibracoes();
+      }
+    };
+
+    document.getElementById("btnAddCalibK1C").addEventListener("click", () => {
+      const nome = prompt("Nome da calibração:");
+      if (!nome) return;
+      const material = prompt("Material (PLA/PETG/ABS):");
+      if (!material) return;
+
+      const calib = carregarCalibracoes();
+      calib.K1C.push({
+        nome,
+        material,
+        temp: toNum(prompt("Temperatura (°C):", "200")),
+        layer: toNum(prompt("Layer height (mm):", "0.2")),
+        speed: toNum(prompt("Velocidade (mm/s):", "100")),
+        nozzle: toNum(prompt("Nozzle (mm):", "0.4")),
+        zoffset: toNum(prompt("Z-offset (mm):", "0")),
+        data: new Date(),
+      });
+      salvarCalibracoes(calib);
+      renderCalibracoes();
+    });
+
+    document.getElementById("btnAddCalibKobra").addEventListener("click", () => {
+      const nome = prompt("Nome da calibração:");
+      if (!nome) return;
+      const material = prompt("Material (PLA/PETG/ABS):");
+      if (!material) return;
+
+      const calib = carregarCalibracoes();
+      calib.KOBRA.push({
+        nome,
+        material,
+        temp: toNum(prompt("Temperatura (°C):", "200")),
+        layer: toNum(prompt("Layer height (mm):", "0.2")),
+        speed: toNum(prompt("Velocidade (mm/s):", "100")),
+        nozzle: toNum(prompt("Nozzle (mm):", "0.4")),
+        zoffset: toNum(prompt("Z-offset (mm):", "0")),
+        data: new Date(),
+      });
+      salvarCalibracoes(calib);
+      renderCalibracoes();
+    });
+
+    renderCalibracoes();
+
+    // ========== TAB: PRAZOS ==========
+    function carregarPrazos() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE.PRAZOS)) || [];
+      } catch {
+        return [];
+      }
+    }
+
+    function salvarPrazos(prazos) {
+      localStorage.setItem(STORAGE.PRAZOS, JSON.stringify(prazos));
+    }
+
+    function renderPrazos() {
+      const prazos = carregarPrazos();
+      const container = document.getElementById("prazosContainer");
+      const status = document.getElementById("filtroPrazoStatus").value;
+      const ordem = document.getElementById("ordenarPrazos").value;
+
+      let filtrado = prazos;
+      if (status) {
+        filtrado = filtrado.filter(p => p.status === status);
+      }
+
+      filtrado.sort((a, b) => {
+        if (ordem === "prazo") return new Date(a.dataPrazo) - new Date(b.dataPrazo);
+        if (ordem === "criacao") return new Date(b.data) - new Date(a.data);
+        if (ordem === "cliente") return a.cliente.localeCompare(b.cliente);
+        return 0;
+      });
+
+      container.innerHTML = "";
+      if (!filtrado.length) {
+        container.innerHTML = '<div class="alert alert-info">Nenhum prazo registrado</div>';
+        atualizarResumoPrazos([]);
+        return;
+      }
+
+      const hoje = new Date();
+      filtrado.forEach((p) => {
+        const dataP = new Date(p.dataPrazo);
+        const diff = Math.floor((dataP - hoje) / (1000 * 60 * 60 * 24));
+
+        let statusClass = "status-active";
+        if (diff < 0) statusClass = "status-pending";
+        if (diff > 7) statusClass = "status-completed";
+
+        const card = document.createElement("div");
+        card.className = "item-row";
+        card.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: start; gap: 8px;">
+            <div style="flex: 1;">
+              <strong>${p.projeto}</strong> - ${p.cliente}<br/>
+              <small>${p.descricao}</small><br/>
+              <small style="color: var(--text-muted);">
+                Data: ${new Date(p.dataPrazo).toLocaleDateString("pt-BR")} |
+                Status: <span class="status-badge"><span class="status-dot ${statusClass}"></span> ${p.status}</span>
+              </small>
+            </div>
+            <span class="status-badge" style="font-weight: bold;">
+              ${diff < 0 ? "⚠️ " + Math.abs(diff) + "d atrasado" : diff === 0 ? "📍 Hoje" : "+"+diff+"d"}
+            </span>
+          </div>
+          <div class="btn-row" style="margin-top: 8px;">
+            <select class="mini-select" onchange="atualizarStatusPrazo('${p.id}', this.value)">
+              <option value="PENDENTE" ${p.status === "PENDENTE" ? "selected" : ""}>Pendente</option>
+              <option value="PRODUCAO" ${p.status === "PRODUCAO" ? "selected" : ""}>Em Produção</option>
+              <option value="PRONTO" ${p.status === "PRONTO" ? "selected" : ""}>Pronto</option>
+              <option value="ENVIADO" ${p.status === "ENVIADO" ? "selected" : ""}>Enviado</option>
+              <option value="ENTREGUE" ${p.status === "ENTREGUE" ? "selected" : ""}>Entregue</option>
+              <option value="CANCELADO" ${p.status === "CANCELADO" ? "selected" : ""}>Cancelado</option>
+            </select>
+            <button class="btn btn-danger btn-sm" onclick="removerPrazo('${p.id}')">Remover</button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      atualizarResumoPrazos(filtrado);
+    }
+
+    function atualizarResumoPrazos(prazos) {
+      const hoje = new Date();
+      let atrasados = 0, hojeQtd = 0, proximos = 0;
+
+      prazos.forEach(p => {
+        const dataP = new Date(p.dataPrazo);
+        const diff = Math.floor((dataP - hoje) / (1000 * 60 * 60 * 24));
+
+        if (diff < 0) atrasados++;
+        else if (diff === 0) hojeQtd++;
+        else if (diff <= 7) proximos++;
+      });
+
+      document.getElementById("prazosAtrasados").textContent = atrasados;
+      document.getElementById("prazosHoje").textContent = hojeQtd;
+      document.getElementById("prazosProximos").textContent = proximos;
+    }
+
+    window.removerPrazo = (id) => {
+      if (confirm("Remover prazo?")) {
+        const prazos = carregarPrazos();
+        const prazo = prazos.find(p => String(p.id) === String(id));
+        if (prazo?.orcId) { alert("Este prazo é vinculado a um pedido. Exclua ou cancele o pedido na aba Controle."); return; }
+        prazos.splice(prazos.findIndex(p => String(p.id) === String(id)), 1);
+        salvarPrazos(prazos);
+        renderPrazos();
+      }
+    };
+
+    window.atualizarStatusPrazo = (id, novoStatus) => {
+      const prazos = carregarPrazos();
+      const prazo = prazos.find(p => String(p.id) === String(id));
+      if (!prazo) return;
+      prazo.status = novoStatus;
+      salvarPrazos(prazos);
+      if (prazo.orcId) atualizarStatusOrc(prazo.orcId, novoStatus === "CANCELADO" ? "CANCELADO" : (novoStatus === "ENTREGUE" ? "PAGO" : "PENDENTE"), true);
+      renderPrazos();
+    };
+
+    document.getElementById("btnAddPrazo").addEventListener("click", () => {
+      const projeto = prompt("Projeto:");
+      if (!projeto) return;
+      const cliente = prompt("Cliente:");
+      const desc = prompt("Descrição:");
+      const dataPrazo = prompt("Data prazo (YYYY-MM-DD):");
+      if (!dataPrazo) return;
+
+      const prazos = carregarPrazos();
+      prazos.push({
+        id: Date.now(),
+        projeto,
+        cliente,
+        descricao: desc,
+        dataPrazo,
+        status: "PENDENTE",
+        data: new Date().toISOString(),
+      });
+      salvarPrazos(prazos);
+      renderPrazos();
+    });
+
+    ["filtroPrazoStatus", "ordenarPrazos"].forEach(id => {
+      document.getElementById(id).addEventListener("change", renderPrazos);
+    });
+
+    renderPrazos();
+
+    // ========== TAB: DESPESAS ==========
+    function carregarDespesas() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE.DESPESAS)) || [];
+      } catch {
+        return [];
+      }
+    }
+
+    function salvarDespesas(despesas) {
+      localStorage.setItem(STORAGE.DESPESAS, JSON.stringify(despesas));
+    }
+
+    function carregarDespesasFixas() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE.DESPESAS_FIXAS)) || [];
+      } catch {
+        return [];
+      }
+    }
+
+    function salvarDespesasFixas(fixas) {
+      localStorage.setItem(STORAGE.DESPESAS_FIXAS, JSON.stringify(fixas));
+    }
+
+    function monthKeyDate(dataStr) {
+      const d = new Date(dataStr);
+      if (isNaN(d)) return "";
+      return d.getFullYear() + "-" + pad2(d.getMonth() + 1);
+    }
+
+    function popularFiltroMesDespesa(despesas) {
+      const sel = document.getElementById("filtroMesDespesa");
+      if (!sel) return;
+      const atual = sel.value || "";
+      const meses = Array.from(new Set(despesas.map(d => monthKeyDate(d.data)).filter(Boolean)))
+        .sort((a, b) => (a > b ? -1 : 1));
+      sel.innerHTML = `<option value="">Todos</option>` +
+        meses.map(m => `<option value="${m}">${formatMonthKey(m)}</option>`).join("");
+      sel.value = (atual === "" || meses.includes(atual)) ? atual : "";
+    }
+
+    function renderDespesas() {
+      const despesas = carregarDespesas();
+      const tbody = document.getElementById("despesasBody");
+      if (!tbody) return;
+
+      popularFiltroMesDespesa(despesas);
+
+      const fMes = document.getElementById("filtroMesDespesa")?.value || "";
+      const fCat = document.getElementById("filtroCategoriaDespesa")?.value || "";
+
+      const filtradas = despesas.filter(d => {
+        const okMes = !fMes || monthKeyDate(d.data) === fMes;
+        const okCat = !fCat || d.categoria === fCat;
+        return okMes && okCat;
+      });
+
+      tbody.innerHTML = "";
+      if (!filtradas.length) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color: var(--text-muted); padding: 16px;">Nenhuma despesa encontrada</td></tr>`;
+      }
+
+      filtradas
+        .sort((a, b) => new Date(b.data) - new Date(a.data))
+        .forEach(d => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${new Date(d.data).toLocaleDateString("pt-BR", { timeZone: "UTC" })}</td>
+            <td>${d.categoria}</td>
+            <td>${d.descricao || "—"}</td>
+            <td>${money(d.valor)}</td>
+            <td><button class="btn btn-ghost btn-sm" onclick="removerDespesa('${d.id}')">Remover</button></td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+      const total = filtradas.reduce((s, d) => s + (d.valor || 0), 0);
+      document.getElementById("despTotalPeriodo").textContent = money(total);
+    }
+
+    window.removerDespesa = (id) => {
+      if (confirm("Remover despesa?")) {
+        let despesas = carregarDespesas();
+        despesas = despesas.filter(d => String(d.id) !== String(id));
+        salvarDespesas(despesas);
+        renderDespesas();
+        if (typeof atualizarDashboard === "function") atualizarDashboard();
+        if (typeof renderControle === "function") renderControle();
+      }
+    };
+
+    document.getElementById("btnAddDespesa").addEventListener("click", () => {
+      const data = document.getElementById("despData").value || new Date().toISOString().slice(0, 10);
+      const categoria = document.getElementById("despCategoria").value;
+      const descricao = document.getElementById("despDescricao").value.trim();
+      const valor = toNum(document.getElementById("despValor").value);
+
+      if (!valor) {
+        alert("❌ Informe o valor da despesa");
+        return;
+      }
+
+      const despesas = carregarDespesas();
+      despesas.push({ id: Date.now(), data, categoria, descricao, valor });
+      salvarDespesas(despesas);
+
+      document.getElementById("despDescricao").value = "";
+      document.getElementById("despValor").value = "";
+
+      renderDespesas();
+      if (typeof atualizarDashboard === "function") atualizarDashboard();
+      if (typeof renderControle === "function") renderControle();
+    });
+
+    ["filtroMesDespesa", "filtroCategoriaDespesa"].forEach(id => {
+      document.getElementById(id).addEventListener("change", renderDespesas);
+    });
+
+    function renderDespesasFixas() {
+      const fixas = carregarDespesasFixas();
+      const container = document.getElementById("despFixasContainer");
+      container.innerHTML = "";
+
+      if (!fixas.length) {
+        container.innerHTML = '<div class="alert alert-info">Nenhuma conta fixa cadastrada</div>';
+        return;
+      }
+
+      fixas.forEach((f, idx) => {
+        const row = document.createElement("div");
+        row.className = "item-row";
+        row.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+            <div><strong>${f.nome}</strong> <small style="color: var(--text-muted);">(${f.categoria})</small><br/><small style="color: var(--text-muted);">${money(f.valor)}/mês</small></div>
+            <button class="btn btn-danger btn-sm" onclick="removerContaFixa(${idx})">Remover</button>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    window.removerContaFixa = (idx) => {
+      if (confirm("Remover conta fixa?")) {
+        const fixas = carregarDespesasFixas();
+        fixas.splice(idx, 1);
+        salvarDespesasFixas(fixas);
+        renderDespesasFixas();
+      }
+    };
+
+    document.getElementById("btnAddContaFixa").addEventListener("click", () => {
+      const nome = prompt("Nome da conta fixa (ex.: Aluguel, Internet, Assinatura software):");
+      if (!nome) return;
+      const valor = toNum(prompt("Valor mensal (R$):"));
+      if (!valor) return;
+      const categoria = prompt(
+        "Categoria (Filamento/Material, Energia, Manutenção/Peças, Equipamento, Embalagem, Marketing, Taxas/Impostos, Aluguel/Internet, Transporte/Envio, Outros):",
+        "Aluguel/Internet"
+      ) || "Outros";
+
+      const fixas = carregarDespesasFixas();
+      fixas.push({ id: Date.now(), nome, valor, categoria });
+      salvarDespesasFixas(fixas);
+      renderDespesasFixas();
+    });
+
+    document.getElementById("btnLancarFixas").addEventListener("click", () => {
+      const fixas = carregarDespesasFixas();
+      if (!fixas.length) {
+        alert("Cadastre pelo menos uma conta fixa primeiro.");
+        return;
+      }
+
+      const hoje = new Date();
+      const mesAtual = hoje.getFullYear() + "-" + pad2(hoje.getMonth() + 1);
+      const dataHoje = `${hoje.getFullYear()}-${pad2(hoje.getMonth() + 1)}-${pad2(hoje.getDate())}`;
+
+      const despesas = carregarDespesas();
+      let lancadas = 0;
+
+      fixas.forEach(f => {
+        const jaLancada = despesas.some(d =>
+          d.categoria === f.categoria &&
+          d.descricao === f.nome &&
+          monthKeyDate(d.data) === mesAtual
+        );
+        if (!jaLancada) {
+          despesas.push({
+            id: Date.now() + Math.random(),
+            data: dataHoje,
+            categoria: f.categoria,
+            descricao: f.nome,
+            valor: f.valor,
+          });
+          lancadas++;
+        }
+      });
+
+      salvarDespesas(despesas);
+      renderDespesas();
+      if (typeof atualizarDashboard === "function") atualizarDashboard();
+      if (typeof renderControle === "function") renderControle();
+
+      alert(lancadas > 0 ? `✅ ${lancadas} despesa(s) fixa(s) lançada(s) para este mês.` : "ℹ️ Todas as contas fixas já foram lançadas este mês.");
+    });
+
+    document.getElementById("despData").value = new Date().toISOString().slice(0, 10);
+    renderDespesasFixas();
+    renderDespesas();
+
+    // ========== TAB: CONFIG ==========
+    function preencherConfigUI() {
+      document.getElementById("cfgNome").value = configAtual.nome || "";
+      document.getElementById("cfgWhatsapp").value = configAtual.whatsapp || "";
+      document.getElementById("cfgEmail").value = configAtual.email || "";
+      document.getElementById("cfgInstagram").value = configAtual.instagram || "";
+      document.getElementById("cfgPixChave").value = configAtual.pixChave || "";
+      document.getElementById("cfgPixTipo").value = configAtual.pixTipo || "cpf";
+      document.getElementById("cfgPixTitular").value = configAtual.pixTitular || "";
+      document.getElementById("cfgTextoModificacoes").value = configAtual.textoMod || "";
+      document.getElementById("cfgTextoValidade").value = configAtual.textoVal || "";
+      document.getElementById("cfgTextoObservacoes").value = configAtual.textoObs || "";
+
+      // Carregar logo
+      const logoData = localStorage.getItem(STORAGE.LOGO);
+      if (logoData) {
+        const preview = document.getElementById("logoPreview");
+        preview.innerHTML = `<img src="${logoData}" alt="Logo" />`;
+      }
+
+      // Mostrar PIX
+      if (configAtual.pixChave) {
+        document.getElementById("pixDisplay").style.display = "block";
+        document.getElementById("pixDisplay").textContent = configAtual.pixChave;
+      }
+    }
+
+    document.getElementById("uploadLogo").addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        const data = evt.target.result;
+        localStorage.setItem(STORAGE.LOGO, data);
+        document.getElementById("logoPreview").innerHTML = `<img src="${data}" alt="Logo" />`;
+        alert("Logo salvo!");
+      };
+      reader.readAsDataURL(file);
+    });
+
+    document.getElementById("btnRemoverLogo").addEventListener("click", () => {
+      localStorage.removeItem(STORAGE.LOGO);
+      document.getElementById("logoPreview").innerHTML = "";
+      alert("Logo removido");
+    });
+
+    document.getElementById("btnSalvarConfig").addEventListener("click", () => {
+      configAtual = {
+        nome: document.getElementById("cfgNome").value,
+        whatsapp: document.getElementById("cfgWhatsapp").value,
+        email: document.getElementById("cfgEmail").value,
+        instagram: document.getElementById("cfgInstagram").value,
+        pixChave: document.getElementById("cfgPixChave").value,
+        pixTipo: document.getElementById("cfgPixTipo").value,
+        pixTitular: document.getElementById("cfgPixTitular").value,
+        textoMod: document.getElementById("cfgTextoModificacoes").value,
+        textoVal: document.getElementById("cfgTextoValidade").value,
+        textoObs: document.getElementById("cfgTextoObservacoes").value,
+      };
+      salvarConfig(configAtual);
+
+      if (configAtual.pixChave) {
+        document.getElementById("pixDisplay").style.display = "block";
+        document.getElementById("pixDisplay").textContent = configAtual.pixChave;
+      }
+
+      alert("Configurações salvas!");
+    });
+
+    document.getElementById("btnResetConfig").addEventListener("click", () => {
+      if (confirm("Restaurar configurações padrão?")) {
+        configAtual = getConfigPadrao();
+        salvarConfig(configAtual);
+        preencherConfigUI();
+        alert("Restaurado!");
+      }
+    });
+
+    document.getElementById("btnLimparTudo").addEventListener("click", () => {
+      if (confirm("⚠️ LIMPAR TUDO? Isso não pode ser desfeito!")) {
+        if (confirm("Tem ABSOLUTA certeza?")) {
+          Object.values(STORAGE).forEach(key => localStorage.removeItem(key));
+          alert("Tudo foi limpo. Atualizando...");
+          location.reload();
+        }
+      }
+    });
+
+    document.getElementById("btnExportarDados").addEventListener("click", () => {
+      const dados = {
+        config: configAtual,
+        custos: carregarCustos(),
+        estoque: carregarEstoque(),
+        calibracoes: carregarCalibracoes(),
+        prazos: carregarPrazos(),
+        orcamentos: JSON.parse(localStorage.getItem(STORAGE.ORCAMENTOS)) || [],
+        despesas: carregarDespesas(),
+        despesasFixas: carregarDespesasFixas(),
+      };
+
+      const blob = new Blob([JSON.stringify(dados, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `backup_3d_${new Date().getTime()}.json`;
+      a.click();
+    });
+
+    preencherConfigUI();
+
+    // ========== TAB: CONTROLE ==========
+    function monthKeyOrc(orc) {
+      const d = new Date(orc.data);
+      if (isNaN(d)) return "";
+      return d.getFullYear() + "-" + pad2(d.getMonth() + 1);
+    }
+
+    function formatMonthKey(mk) {
+      if (!mk || mk.length !== 7) return "—";
+      const [y, m] = mk.split("-");
+      return `${m}/${y}`;
+    }
+
+    function popularFiltroMesControle(orcamentos) {
+      const sel = document.getElementById("filtroMesControl");
+      if (!sel) return;
+      const atual = sel.value || "";
+      const meses = Array.from(new Set(orcamentos.map(monthKeyOrc).filter(Boolean)))
+        .sort((a, b) => (a > b ? -1 : 1));
+      sel.innerHTML = `<option value="">Todos</option>` +
+        meses.map(m => `<option value="${m}">${formatMonthKey(m)}</option>`).join("");
+      sel.value = (atual === "" || meses.includes(atual)) ? atual : "";
+    }
+
+    function renderControle() {
+      const orcamentos = JSON.parse(localStorage.getItem(STORAGE.ORCAMENTOS)) || [];
+      const tbody = document.getElementById("controlBody");
+      if (!tbody) return;
+
+      popularFiltroMesControle(orcamentos);
+
+      const fMes = document.getElementById("filtroMesControl")?.value || "";
+      const fStatus = document.getElementById("filtroStatusControl")?.value || "";
+
+      const filtrados = orcamentos.filter(o => {
+        const okMes = !fMes || monthKeyOrc(o) === fMes;
+        const okStatus = !fStatus || o.status === fStatus;
+        return okMes && okStatus;
+      });
+
+      tbody.innerHTML = "";
+
+      if (!filtrados.length) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted); padding: 16px;">Nenhum orçamento encontrado</td></tr>`;
+      }
+
+      filtrados
+        .sort((a, b) => new Date(b.data) - new Date(a.data))
+        .forEach((orc) => {
+          const data = new Date(orc.data).toLocaleDateString("pt-BR");
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${data}</td>
+            <td>${orc.cliente || "—"}</td>
+            <td>${orc.projeto || "—"}</td>
+            <td>${money(orc.precoFinal)}</td>
+            <td>
+              <select onchange="atualizarStatusOrc('${orc.id}', this.value)">
+                <option value="PENDENTE" ${orc.status === "PENDENTE" ? "selected" : ""}>Pendente</option>
+                <option value="PAGO" ${orc.status === "PAGO" ? "selected" : ""}>Pago</option>
+                <option value="CANCELADO" ${orc.status === "CANCELADO" ? "selected" : ""}>Cancelado</option>
+              </select>
+            </td>
+            <td>
+              <button class="btn btn-ghost btn-sm" onclick="editarOrcamento('${orc.id}')">Editar</button>
+              <button class="btn btn-ghost btn-sm" onclick="excluirOrcamento('${orc.id}')">Excluir</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+      // Resumo considera o filtro aplicado
+      let faturamento = 0, pago = 0;
+      filtrados.forEach(o => {
+        faturamento += o.precoFinal || 0;
+        if (o.status === "PAGO") pago += o.precoFinal || 0;
+      });
+
+      document.getElementById("sumFaturamento").textContent = money(faturamento);
+      document.getElementById("sumPago").textContent = money(pago);
+      document.getElementById("sumPendente").textContent = money(faturamento - pago);
+
+      // Financeiro: despesas do mesmo período filtrado + lucro líquido
+      const despesasPeriodo = carregarDespesas().filter(d => !fMes || monthKeyDate(d.data) === fMes);
+      const totalDespesas = despesasPeriodo.reduce((s, d) => s + (d.valor || 0), 0);
+      const lucroLiquidoPeriodo = pago - totalDespesas;
+
+      const sumDespesasEl = document.getElementById("sumDespesas");
+      const sumLucroEl = document.getElementById("sumLucroLiquido");
+      if (sumDespesasEl) sumDespesasEl.textContent = money(totalDespesas);
+      if (sumLucroEl) {
+        sumLucroEl.textContent = money(lucroLiquidoPeriodo);
+        sumLucroEl.style.color = lucroLiquidoPeriodo >= 0 ? "var(--accent-green)" : "var(--accent-red)";
+      }
+
+      const porCategoria = {};
+      despesasPeriodo.forEach(d => {
+        porCategoria[d.categoria] = (porCategoria[d.categoria] || 0) + (d.valor || 0);
+      });
+      const catBody = document.getElementById("despesasPorCategoriaBody");
+      if (catBody) {
+        const cats = Object.keys(porCategoria).sort((a, b) => porCategoria[b] - porCategoria[a]);
+        catBody.innerHTML = cats.length
+          ? cats.map(c => `<tr><td>${c}</td><td>${money(porCategoria[c])}</td></tr>`).join("")
+          : `<tr><td colspan="2" style="text-align:center; color: var(--text-muted); padding: 12px;">Nenhuma despesa no período</td></tr>`;
+      }
+    }
+
+    window.atualizarStatusOrc = (id, status, veioDoPrazo = false) => {
+      const orcamentos = JSON.parse(localStorage.getItem(STORAGE.ORCAMENTOS)) || [];
+      const orc = orcamentos.find(o => String(o.id) === String(id));
+      if (orc) {
+        const eraCancelado = orc.status === "CANCELADO";
+        orc.status = status;
+        orc.pago = (status === "PAGO");
+        if (status === "CANCELADO" && !eraCancelado) restaurarEstoqueDoOrcamento(orc);
+        if (eraCancelado && status !== "CANCELADO") baixarEstoqueDoOrcamento(orc);
+        localStorage.setItem(STORAGE.ORCAMENTOS, JSON.stringify(orcamentos));
+        if (!veioDoPrazo) sincronizarPrazoDoOrcamento(orc);
+        atualizarTelasRelacionadas();
+      }
+    };
+
+    window.excluirOrcamento = (id) => {
+      if (confirm("Excluir orçamento?")) {
+        let orcamentos = JSON.parse(localStorage.getItem(STORAGE.ORCAMENTOS)) || [];
+        const orcamento = orcamentos.find(o => String(o.id) === String(id));
+        restaurarEstoqueDoOrcamento(orcamento);
+        orcamentos = orcamentos.filter(o => String(o.id) !== String(id));
+        localStorage.setItem(STORAGE.ORCAMENTOS, JSON.stringify(orcamentos));
+        salvarPrazos(carregarPrazos().filter(p => String(p.orcId) !== String(id)));
+        atualizarTelasRelacionadas();
+      }
+    };
+
+    window.editarOrcamento = (id) => {
+      const orc = (JSON.parse(localStorage.getItem(STORAGE.ORCAMENTOS)) || []).find(o => String(o.id) === String(id));
+      if (!orc) return;
+      document.getElementById("orcCliente").value = orc.cliente || ""; document.getElementById("orcProjeto").value = orc.projeto || "";
+      document.getElementById("orcDescricao").value = orc.descricao || ""; document.getElementById("orcImpressora").value = orc.impressora || "K1C";
+      document.getElementById("orcDesconto").value = orc.desconto || ""; document.getElementById("orcPrazo").value = orc.prazo || "";
+      document.getElementById("orcModelagem").value = orc.modelagem || ""; document.getElementById("orcPintura").value = orc.pintura || "";
+      fotosOrcamento = orc.fotos || []; document.getElementById("orcFotosPreview").innerHTML = fotosOrcamento.map(src => `<img src="${src}" style="width:72px;height:72px;object-fit:cover;border-radius:6px;">`).join("");
+      orcItensContainer.innerHTML = ""; orc.itens.forEach(i => { addOrcItem(); const r = orcItensContainer.lastElementChild; r.querySelector(".orc-item-nome").value=i.nome; r.querySelector(".orc-item-qtd").value=i.qtd; r.querySelector(".orc-item-peso").value=i.peso; r.querySelector(".orc-item-material").value=i.material; r.querySelector(".orc-item-filamento").innerHTML=opcoesFilamento(i.material); r.querySelector(".orc-item-filamento").value=i.filamentoId; r.querySelector(".orc-item-horas").value=i.horas || 0; r.querySelector(".orc-item-minutos").value=i.minutos || 0; });
+      orcamentoEmEdicaoId = id;
+      document.querySelector('[data-tab="orcamento"]').click();
+      alert("Pedido carregado. Faça os ajustes, clique em Calcular e depois em Salvar para atualizar prazo e estoque.");
+    };
+
+    ["filtroMesControl", "filtroStatusControl"].forEach(id => {
+      document.getElementById(id)?.addEventListener("change", renderControle);
+    });
+
+    renderControle();
+
+    // ========== TAB: DASHBOARD ==========
+    const CATALOGO_PADRAO = [
+      { id: 1, nome: "Chaveiro Simples", peso: 8, tempo: 0.25, categoria: "Decoração", preco: 15 },
+      { id: 2, nome: "Miniatura (5cm)", peso: 25, tempo: 0.5, categoria: "Personagem", preco: 35 },
+      { id: 3, nome: "Suporte Celular", peso: 45, tempo: 1, categoria: "Funcional", preco: 60 },
+      { id: 4, nome: "Pulseira Ajustável", peso: 12, tempo: 0.3, categoria: "Decoração", preco: 20 },
+      { id: 5, nome: "Caixa Pequena", peso: 40, tempo: 0.8, categoria: "Utilitário", preco: 45 },
+      { id: 6, nome: "Figura Articulada", peso: 60, tempo: 1.5, categoria: "Personagem", preco: 85 },
+      { id: 7, nome: "Organizador Gaveta", peso: 80, tempo: 1.2, categoria: "Utilitário", preco: 65 },
+      { id: 8, nome: "Placa Decorativa", peso: 35, tempo: 0.7, categoria: "Decoração", preco: 40 },
+      { id: 9, nome: "Suporte Fone", peso: 50, tempo: 1, categoria: "Funcional", preco: 55 },
+      { id: 10, nome: "Miniatura D&D", peso: 30, tempo: 0.8, categoria: "Personagem", preco: 50 },
+    ];
+
+    function salvarCatalogo(cat) {
+      localStorage.setItem("fh3d_catalogo_custom", JSON.stringify(cat));
+    }
+
+    function carregarCatalogo() {
+      try {
+        const custom = JSON.parse(localStorage.getItem("fh3d_catalogo_custom")) || [];
+        return [...CATALOGO_PADRAO, ...custom];
+      } catch {
+        return CATALOGO_PADRAO;
+      }
+    }
+
+    function renderCatalogo() {
+      const catalogo = carregarCatalogo();
+      const filtro = document.getElementById("filtroCatalogo").value;
+      const grid = document.getElementById("catalogoGrid");
+
+      const filtrado = filtro ? catalogo.filter(p => p.categoria === filtro) : catalogo;
+
+      grid.innerHTML = "";
+      filtrado.forEach(prod => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.style.cursor = "pointer";
+        card.style.transition = "transform 0.2s, box-shadow 0.2s";
+        card.innerHTML = `
+          <div class="card-header">
+            <div>
+              <div class="card-title" style="font-size: 14px;">${prod.nome}</div>
+              <div class="card-subtitle">${prod.categoria}</div>
+            </div>
+          </div>
+          <div class="storage-info" style="margin: 8px 0;">
+            📊 ${prod.peso}g | ⏱️ ${prod.tempo}h | 💵 ${money(prod.preco)}
+          </div>
+          <button class="btn btn-primary btn-sm" style="width: 100%;" onclick="adicionarProdutoAoOrcamento(${prod.id})">
+            Adicionar ao orçamento
+          </button>
+        `;
+        card.onmouseover = () => card.style.transform = "translateY(-2px)";
+        card.onmouseout = () => card.style.transform = "translateY(0)";
+        grid.appendChild(card);
+      });
+    }
+
+    window.adicionarProdutoAoOrcamento = (prodId) => {
+      const catalogo = carregarCatalogo();
+      const prod = catalogo.find(p => p.id === prodId);
+      if (!prod) return;
+
+      // Reutiliza o mesmo template dos itens do orçamento (evita divergência de campos)
+      addOrcItem();
+      const row = orcItensContainer.lastElementChild;
+
+      // Converte tempo decimal (ex.: 0.25h) em horas + minutos
+      const horas = Math.floor(prod.tempo);
+      const minutos = Math.round((prod.tempo - horas) * 60);
+
+      row.querySelector(".orc-item-nome").value = prod.nome;
+      row.querySelector(".orc-item-peso").value = prod.peso;
+      row.querySelector(".orc-item-horas").value = horas;
+      row.querySelector(".orc-item-minutos").value = minutos;
+
+      // Mudar para aba de orçamento
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+      document.querySelector('[data-tab="orcamento"]').classList.add("active");
+      document.getElementById("tab-orcamento").classList.add("active");
+
+      alert(`✅ ${prod.nome} adicionado! Configure a quantidade e prossiga.`);
+    };
+
+    document.getElementById("btnAddProdutoCustom").addEventListener("click", () => {
+      const nome = prompt("Nome do produto:");
+      if (!nome) return;
+      const cat = prompt("Categoria (Decoração/Funcional/Utilitário/Personagem):");
+      if (!cat) return;
+      const peso = toNum(prompt("Peso padrão (g):"));
+      const tempo = toNum(prompt("Tempo padrão (horas):"));
+      const preco = toNum(prompt("Preço sugerido (R$):"));
+
+      const custom = JSON.parse(localStorage.getItem("fh3d_catalogo_custom")) || [];
+      custom.push({
+        id: Date.now(),
+        nome,
+        categoria: cat,
+        peso,
+        tempo,
+        preco,
+      });
+      salvarCatalogo(custom);
+      renderCatalogo();
+      alert("Produto adicionado ao catálogo!");
+    });
+
+    document.getElementById("filtroCatalogo").addEventListener("change", renderCatalogo);
+
+    renderCatalogo();
+
+    // ========== DASHBOARD UPDATE ==========
+    function atualizarDashboard() {
+      const orcamentos = JSON.parse(localStorage.getItem(STORAGE.ORCAMENTOS)) || [];
+      const prazos = carregarPrazos();
+      const estoque = carregarEstoque();
+      const despesas = carregarDespesas();
+
+      // Faturamento do mês
+      const agora = new Date();
+      const mesAtual = agora.getFullYear() + "-" + pad2(agora.getMonth() + 1);
+
+      let faturamento = 0, pago = 0;
+      const ultimosOrc = [];
+
+      orcamentos.forEach(orc => {
+        const data = new Date(orc.data);
+        const mesOrc = data.getFullYear() + "-" + pad2(data.getMonth() + 1);
+        if (mesOrc === mesAtual) {
+          faturamento += orc.precoFinal || 0;
+          if (orc.status === "PAGO") pago += orc.precoFinal || 0;
+        }
+        ultimosOrc.push(orc);
+      });
+
+      const pendente = faturamento - pago;
+
+      document.getElementById("dashFaturamento").textContent = money(faturamento);
+      document.getElementById("dashPago").textContent = money(pago);
+      document.getElementById("dashPendente").textContent = money(pendente);
+
+      // Despesas do mês e lucro líquido
+      let despesasMes = 0;
+      despesas.forEach(d => {
+        if (monthKeyDate(d.data) === mesAtual) despesasMes += d.valor || 0;
+      });
+      const lucroLiquido = pago - despesasMes;
+
+      document.getElementById("dashDespesas").textContent = money(despesasMes);
+      const lucroEl = document.getElementById("dashLucroLiquido");
+      lucroEl.textContent = money(lucroLiquido);
+      lucroEl.style.color = lucroLiquido >= 0 ? "var(--accent-green)" : "var(--accent-red)";
+
+      // Últimos orçamentos
+      const tbody = document.getElementById("dashUltimosOrc");
+      tbody.innerHTML = "";
+      ultimosOrc.slice(-5).reverse().forEach(orc => {
+        const tr = document.createElement("tr");
+        const statusColor = orc.status === "PAGO" ? "var(--accent-green)" : "var(--accent)";
+        tr.innerHTML = `
+          <td>${orc.cliente || "—"}</td>
+          <td>${orc.projeto}</td>
+          <td>${money(orc.precoFinal)}</td>
+          <td><span style="color: ${statusColor}; font-weight: bold;">${orc.status}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Estoque crítico
+      const estoqueContainer = document.getElementById("dashEstoqueCritico");
+      const criticos = estoque.filter(e => e.peso < 100);
+      if (criticos.length === 0) {
+        estoqueContainer.innerHTML = '<div style="font-size: 12px; color: var(--accent-green);">✅ Todos ok</div>';
+      } else {
+        estoqueContainer.innerHTML = criticos.map(e =>
+          `<div style="font-size: 11px; color: var(--accent-red);">⚠️ ${e.fabricante} ${e.cor}: ${e.peso}g</div>`
+        ).join("");
+      }
+
+      // Prazos com alerta
+      const hoje = new Date();
+      const alertasContainer = document.getElementById("dashPrazosAlerta");
+      const atrasados = prazos.filter(p => {
+        const dataPrazo = new Date(p.dataPrazo);
+        const diff = Math.floor((dataPrazo - hoje) / (1000 * 60 * 60 * 24));
+        return diff < 0 && p.status !== "ENTREGUE" && p.status !== "CANCELADO";
+      });
+
+      const vencendo = prazos.filter(p => {
+        const dataPrazo = new Date(p.dataPrazo);
+        const diff = Math.floor((dataPrazo - hoje) / (1000 * 60 * 60 * 24));
+        return diff >= 0 && diff <= 2 && p.status !== "ENTREGUE" && p.status !== "CANCELADO";
+      });
+
+      if (atrasados.length === 0 && vencendo.length === 0) {
+        alertasContainer.innerHTML = '<div style="font-size: 12px; color: var(--accent-green);">✅ Nenhum atrasado</div>';
+      } else {
+        let html = "";
+        atrasados.forEach(p => {
+          const diff = Math.floor((new Date(p.dataPrazo) - hoje) / (1000 * 60 * 60 * 24));
+          html += `<div style="font-size: 11px; color: var(--accent-red);">🔴 ${p.projeto}: ${Math.abs(diff)} dias atrasado</div>`;
+        });
+        vencendo.forEach(p => {
+          html += `<div style="font-size: 11px; color: #f59e0b;">🟡 ${p.projeto}: vence hoje/amanhã</div>`;
+        });
+        alertasContainer.innerHTML = html;
+      }
+
+      // Próximas entregas
+      const proximasContainer = document.getElementById("dashProximas");
+      const proximas = prazos
+        .filter(p => p.status !== "ENTREGUE" && p.status !== "CANCELADO")
+        .sort((a, b) => new Date(a.dataPrazo) - new Date(b.dataPrazo))
+        .slice(0, 3);
+
+      if (proximas.length === 0) {
+        proximasContainer.innerHTML = '<div style="font-size: 12px; color: var(--text-muted);">Nenhuma programada</div>';
+      } else {
+        proximasContainer.innerHTML = proximas.map(p => `
+          <div style="padding: 8px; background: rgba(6, 182, 212, 0.1); border-radius: 6px; border-left: 3px solid var(--accent);">
+            <div style="font-weight: 600; font-size: 12px;">${p.projeto}</div>
+            <div style="font-size: 11px; color: var(--text-muted);">📅 ${new Date(p.dataPrazo).toLocaleDateString("pt-BR")} • ${p.cliente}</div>
+          </div>
+        `).join("");
+      }
+    }
+
+    // Atualizar dashboard ao carregar
+    atualizarDashboard();
+
+    // Atualizar dashboard quando salvar orçamento
+    const btnSalvarOrcOriginal = document.getElementById("btnSalvarOrcamento");
+    const clickOriginal = btnSalvarOrcOriginal.onclick;
+    document.getElementById("btnSalvarOrcamento").addEventListener("click", () => {
+      setTimeout(() => {
+        atualizarDashboard();
+        renderControle();
+      }, 500);
+    });
+
+    // ========== PDF MELHORADO COM PIX ==========
+    document.getElementById("btnGerarPDFOrc").addEventListener("click", () => {
+      if (!window.ultimoOrcamento) {
+        alert("Calcule um orçamento primeiro");
+        return;
+      }
+
+      // Criar container do PDF em FLUXO NORMAL (position absolute/off-screen faz o
+      // html2canvas capturar altura 0 = PDF em branco). Fica dentro de um overlay.
+      const container = document.createElement("div");
+      container.style.width = "210mm";
+      container.style.background = "white";
+      container.style.padding = "20mm";
+      container.style.fontFamily = "Arial, sans-serif";
+      container.style.color = "#111";
+      container.style.boxSizing = "border-box";
+
+      const logoData = localStorage.getItem(STORAGE.LOGO);
+      const logoHtml = logoData ? `<img src="${logoData}" style="height: 60px; margin-bottom: 10px;" />` : "";
+
+      let pixQRHtml = "";
+      if (configAtual.pixChave) {
+        pixQRHtml = `
+          <div style="text-align: center; margin: 20px 0; padding: 15px; border: 2px dashed #ccc; border-radius: 8px;">
+            <p style="margin: 0 0 10px 0; font-size: 12px; font-weight: bold;">Pagamento via PIX</p>
+            <p style="margin: 10px 0 0 0; font-size: 11px; color: #666;">
+              Chave: ${configAtual.pixChave}<br/>
+              Titular: ${configAtual.pixTitular}
+            </p>
+          </div>
+        `;
+      }
+
+      const orc = window.ultimoOrcamento;
+      const fotosHtml = (orc.fotos || []).length ? `<div style="margin:18px 0;"><h3 style="font-size:13px;">Referências do produto</h3><div style="display:flex;flex-wrap:wrap;gap:8px;">${orc.fotos.map(src => `<img src="${src}" style="width:82mm;max-height:60mm;object-fit:contain;border:1px solid #ddd;border-radius:4px;">`).join("")}</div></div>` : "";
+      const preco = orc.precoFinal;
+      const desconto = orc.desconto || 0;
+      const tempoStr = orc.tempoTotalHoras + "h" + (orc.tempoTotalMinutos ? " " + Math.round(orc.tempoTotalMinutos) + "min" : "");
+
+      const itensHtml = orc.itens
+        .map(i => {
+          const h = i.horas != null ? i.horas : Math.floor(i.tempoEmHoras || 0);
+          const m = i.minutos != null ? i.minutos : Math.round(((i.tempoEmHoras || 0) - h) * 60);
+          const tempoItem = h + "h" + (m ? " " + m + "min" : "");
+          return `<tr style="border-bottom: 1px solid #ddd;">
+          <td style="padding: 6px;">${i.qtd}x ${i.nome}</td>
+          <td style="padding: 6px; text-align: right;">${i.peso}g</td>
+          <td style="padding: 6px; text-align: right;">${tempoItem}</td>
+          <td style="padding: 6px; text-align: right;">${i.material}</td>
+        </tr>`;
+        })
+        .join("");
+
+      container.innerHTML = `
+        <div style="margin-bottom: 20px;">
+          ${logoHtml}
+          <h1 style="margin: 0; font-size: 24px;">${configAtual.nome || "STUDIO FH3D"}</h1>
+          <p style="margin: 5px 0; font-size: 11px; color: #666;">Orçamento de Impressão 3D</p>
+        </div>
+
+        <hr style="margin: 15px 0;">
+
+        <h2 style="font-size: 14px; margin: 10px 0;">Orçamento #${Date.now().toString().slice(-6)}</h2>
+        <p><strong>Cliente:</strong> ${window.ultimoOrcamento.cliente || "Não informado"}</p>
+        <p><strong>Projeto:</strong> ${window.ultimoOrcamento.projeto}</p>
+        <p><strong>Data:</strong> ${new Date().toLocaleDateString("pt-BR")}</p>
+
+        <h3 style="font-size: 13px; margin: 15px 0 5px 0;">Itens do Orçamento</h3>
+        <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
+          <thead>
+            <tr style="background: #f0f0f0; border-bottom: 2px solid #333;">
+              <th style="padding: 6px; text-align: left;">Item</th>
+              <th style="padding: 6px; text-align: right;">Peso</th>
+              <th style="padding: 6px; text-align: right;">Tempo</th>
+              <th style="padding: 6px; text-align: right;">Material</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${itensHtml}
+          </tbody>
+        </table>
+
+        ${fotosHtml}
+
+        <div style="margin: 20px 0; padding: 15px; background: #f9f9f9; border-radius: 8px; font-size: 11px;">
+          <p style="margin: 0 0 8px 0;"><strong>📊 Dados de Impressão</strong></p>
+          <table style="width: 100%; font-size: 11px;">
+            <tr><td style="padding: 2px;">Tempo estimado de produção:</td><td style="text-align: right;">${tempoStr}</td></tr>
+            <tr><td style="padding: 2px;">Prazo de entrega:</td><td style="text-align: right;">${orc.prazo ? "até " + orc.prazo + " dia(s) após confirmação" : "a combinar"}</td></tr>
+          </table>
+        </div>
+
+        <div style="margin: 20px 0; padding: 15px; background: #e0f7ff; border-left: 4px solid #0ea5e9; border-radius: 8px;">
+          <table style="width: 100%; font-size: 12px;">
+            ${(orc.modelagem || orc.pintura || desconto) ? `<tr>
+              <td>Impressão 3D:</td>
+              <td style="text-align: right;">${money(orc.precoImpressao)}</td>
+            </tr>` : ""}
+            ${orc.modelagem ? `<tr>
+              <td>Modelagem 3D:</td>
+              <td style="text-align: right;">${money(orc.modelagem)}</td>
+            </tr>` : ""}
+            ${orc.pintura ? `<tr>
+              <td>Pintura / acabamento:</td>
+              <td style="text-align: right;">${money(orc.pintura)}</td>
+            </tr>` : ""}
+            ${desconto ? `<tr>
+              <td>Desconto:</td>
+              <td style="text-align: right;">- ${money(desconto)}</td>
+            </tr>` : ""}
+            <tr style="${(orc.modelagem || orc.pintura || desconto) ? "border-top: 2px solid #0ea5e9;" : ""} font-size: 15px;">
+              <td><strong>💵 VALOR TOTAL:</strong></td>
+              <td style="text-align: right; color: #0ea5e9;"><strong>${money(preco)}</strong></td>
+            </tr>
+          </table>
+        </div>
+
+        ${pixQRHtml}
+
+        <hr style="margin: 20px 0;">
+
+        <div style="font-size: 11px; line-height: 1.6; color: #666;">
+          <p><strong>Observações:</strong></p>
+          <p>${configAtual.textoMod || "Até 2 rodadas de ajustes no modelo."}</p>
+          <p><strong>Validade:</strong> ${configAtual.textoVal || "Válido por 7 dias."}</p>
+        </div>
+
+        <hr style="margin: 20px 0;">
+
+        <div style="text-align: center; font-size: 10px; color: #999;">
+          <p>${configAtual.whatsapp ? `📱 ${configAtual.whatsapp}` : ""}</p>
+          <p>${configAtual.email ? `📧 ${configAtual.email}` : ""}</p>
+          <p>${configAtual.instagram ? `📷 ${configAtual.instagram}` : ""}</p>
+          <p style="margin-top: 10px;">Orçamento gerado em ${new Date().toLocaleString("pt-BR")}</p>
+        </div>
+      `;
+
+      // Verificar se a biblioteca de PDF carregou (falha comum se estiver offline)
+      if (typeof html2pdf === "undefined") {
+        alert("⚠️ A biblioteca de PDF não carregou. Conecte-se à internet pelo menos uma vez para gerar o PDF.");
+        return;
+      }
+
+      // Overlay que mostra "Gerando PDF..." e mantém o container em fluxo normal
+      const overlay = document.createElement("div");
+      overlay.style.cssText = "position:fixed; inset:0; z-index:99999; background:rgba(2,6,23,0.92); overflow:auto; display:flex; flex-direction:column; align-items:center; padding:20px; gap:14px;";
+      const loading = document.createElement("div");
+      loading.style.cssText = "color:#22d3ee; font-family:system-ui,sans-serif; font-size:15px; font-weight:600; padding:8px 16px;";
+      loading.textContent = "⏳ Gerando PDF...";
+      overlay.appendChild(loading);
+      overlay.appendChild(container);
+      document.body.appendChild(overlay);
+
+      const limparOverlay = () => { if (overlay.parentNode) document.body.removeChild(overlay); };
+
+      const gerarPDFFinal = () => {
+        const opt = {
+          margin: 0,
+          filename: `Orcamento_${(window.ultimoOrcamento.projeto || "3D").replace(/[^\w\-]/g, "_")}_${Date.now()}.pdf`,
+          image: { type: "jpeg", quality: 0.95 },
+          html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
+          jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+          pagebreak: { mode: ["css", "legacy"] },
+        };
+
+        html2pdf().set(opt).from(container).save()
+          .then(() => {
+            limparOverlay();
+            alert("✅ PDF gerado com sucesso!");
+          })
+          .catch((err) => {
+            console.error("Erro ao gerar PDF:", err);
+            limparOverlay();
+            alert("❌ Ocorreu um erro ao gerar o PDF. Tente novamente.");
+          });
+      };
+
+      gerarPDFFinal();
+    });
+
+    // ========== INICIALIZAÇÃO ==========
+    console.log("🚀 PRECIFICADOR 3D PRO v3.0");
+    console.log("✅ Dashboard - Métricas em tempo real");
+    console.log("✅ Despesas e contas fixas + Lucro líquido");
+    console.log("✅ PDF com chave PIX e fotos do produto");
+    console.log("✅ Catálogo de 10 produtos padrão");
+    console.log("📦 Estoque, 🔧 Calibrações, 📅 Prazos, 💸 Despesas");
+    console.log("💾 Dados salvos automaticamente no navegador");
+  </script>
+</body>
+</html>
