@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#07111f">
+  <title>Precificador 3D Pro V4</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div id="app" class="app-shell">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark">3D</span><div><small>Studio FH3D</small><h1>Precificador <b>Pro</b></h1></div></div>
+      <div class="top-actions">
+        <span id="syncStatus" class="sync offline">Offline</span>
+        <button id="accountButton" class="button secondary">Entrar</button>
+      </div>
+    </header>
+
+    <div id="notice" class="notice hidden" role="status"></div>
+
+    <nav id="tabs" class="tabs" aria-label="Navegação principal">
+      <button id="mobileAccountButton" data-action="open-account" class="mobile-account">Entrar</button>
+      <button data-tab="dashboard" class="active">Home</button>
+      <button data-tab="quote">Orçamento</button>
+      <button data-tab="orders">Controle</button>
+      <button data-tab="deadlines">Prazos</button>
+      <button data-tab="inventory">Estoque</button>
+      <button data-tab="expenses">Despesas</button>
+      <button data-tab="catalog">Catálogo</button>
+      <button data-tab="settings">Configurações</button>
+    </nav>
+
+    <main>
+      <section id="tab-dashboard" class="panel active"></section>
+      <section id="tab-quote" class="panel"></section>
+      <section id="tab-orders" class="panel"></section>
+      <section id="tab-deadlines" class="panel"></section>
+      <section id="tab-inventory" class="panel"></section>
+      <section id="tab-expenses" class="panel"></section>
+      <section id="tab-catalog" class="panel"></section>
+      <section id="tab-settings" class="panel"></section>
+    </main>
+  </div>
+
+  <dialog id="authDialog" class="dialog">
+    <form method="dialog" class="dialog-card">
+      <div class="dialog-head"><div><h2>Conta do estúdio</h2><p>Use a mesma conta no PC e no celular.</p></div><button value="cancel" class="icon-button" aria-label="Fechar">×</button></div>
+      <div id="authLoggedOut" class="stack">
+        <label>E-mail<input id="authEmail" type="email" autocomplete="email"></label>
+        <label>Senha<input id="authPassword" type="password" minlength="6" autocomplete="current-password"></label>
+        <div class="actions"><button id="signInButton" type="button" class="button primary">Entrar</button><button id="signUpButton" type="button" class="button secondary">Criar conta</button></div>
+      </div>
+      <div id="authLoggedIn" class="stack hidden"><p id="authIdentity"></p><button id="signOutButton" type="button" class="button danger">Sair</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="confirmDialog" class="dialog"><form method="dialog" class="dialog-card"><h2 id="confirmTitle">Confirmar</h2><p id="confirmText"></p><div class="actions"><button value="cancel" class="button secondary">Voltar</button><button id="confirmAccept" value="default" class="button danger">Confirmar</button></div></form></dialog>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
