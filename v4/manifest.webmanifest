@@ -1,0 +1,14 @@
+{
+  "name": "Precificador 3D Pro V4",
+  "short_name": "Precificador 3D",
+  "description": "Orçamentos, produção, estoque e financeiro do Studio FH3D.",
+  "lang": "pt-BR",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#07111f",
+  "theme_color": "#07111f",
+  "icons": [
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
